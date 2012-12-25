@@ -1,0 +1,9 @@
+{
+  "name": "niko-in-london",
+  "description": "Niko In London photoblog",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.x"
+  }
+}
