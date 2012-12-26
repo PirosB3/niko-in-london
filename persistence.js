@@ -6,7 +6,6 @@ var getAllPhotos = function(db) {
         if (err) q.reject(err);
         coll.count(function(err, count) {
             if (err) q.reject(err);
-            console.log("RESOLVE");
             q.resolve(count);
         });
     });

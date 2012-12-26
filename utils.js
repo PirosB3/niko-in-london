@@ -21,7 +21,7 @@ var storeImageInS3 = function(client, imageName, imageBuffer) {
 
     var d = Q.defer();
     client.putBuffer(imageBuffer, filePath, headers, function(err, res) {
-        !err && (res.statusCode === 200) ? d.resolve() : d.reject(err);
+        !err && (res.statusCode === 200) ? d.resolve(imageName) : d.reject(err);
     });
     return d.promise;
 };
