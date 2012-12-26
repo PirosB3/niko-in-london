@@ -16,7 +16,7 @@ var logo = fs.readFileSync('./logo.png')
 
 buster.testCase('utils', {
     setUp : function() {
-        this.timeout = 1000;
+        this.timeout = 2000;
     },
     'it should return a string' : function() {
         var url = utils.createSignedS3Url(client, '/hello/world');
@@ -35,6 +35,7 @@ buster.testCase('utils', {
 
 buster.testCase('persistence', {
     setUp : function(done) {
+        this.timeout = 1000;
         var _this = this;
         MongoClient.connect(settings.MONGO_URL_TEST, function(err, _db) {
             _db.collection('photos', function(err, coll) {
@@ -46,17 +47,27 @@ buster.testCase('persistence', {
         });
     },
     'it should add a photo to mongodb' : function(done) {
+      var db = this.db;
       var photo = {
           title: 'Hello World',
-          image: {
-              buffer: logo,
-              filename: 'hello-world.png'
-          }
+          path: 'hello-world.png'
       };
-      persistence.getAllPhotos(this.db).then(function(count) {
+      persistence.getAllPhotos(db).then(function(count) {
           assert.same(count, 0);
-          done();
+          persistence.addPhoto(photo, db).then(function(res) {
+              assert.same(res.comments.length, 0);
+              persistence.getAllPhotos(db).then(function(count) {
+                  assert.same(1, count);
+                  done();
+              });
+          });
       });
+    },
+    'it should refute if required attr are not filled in': function(done) {
+          persistence.addPhoto({}, this.db).then(undefined, function(e) {
+              assert(e);
+              done();
+          });
     }
 });
 
@@ -81,10 +92,3 @@ buster.testCase('persistence', {
     //});
 //});
 
-                //persistence.addPhoto(photo, db).then(function(res) {
-                    //assert.equal(res.comments.length, 0);
-                    //persistence.getAllPhotos(db).then(function(count) {
-                        //assert.equal(1, count);
-                        //done();
-                    //});
-                //});
