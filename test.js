@@ -8,8 +8,8 @@ var persistence = require('./persistence.js');
 
 var client = knox.createClient({
     key: settings.AMAZON_S3_KEY
-  , secret: settings.AMAZON_S3_SECRET
-  , bucket: settings.AMAZON_S3_BUCKET
+    , secret: settings.AMAZON_S3_SECRET
+    , bucket: settings.AMAZON_S3_BUCKET
 });
 
 var logo = fs.readFileSync('./logo.png')
@@ -47,48 +47,26 @@ buster.testCase('persistence', {
         });
     },
     'it should add a photo to mongodb' : function(done) {
-      var db = this.db;
-      var photo = {
-          title: 'Hello World',
-          path: 'hello-world.png'
-      };
-      persistence.getAllPhotos(db).then(function(count) {
-          assert.same(count, 0);
-          persistence.addPhoto(photo, db).then(function(res) {
-              assert.same(res.comments.length, 0);
-              persistence.getAllPhotos(db).then(function(count) {
-                  assert.same(1, count);
-                  done();
-              });
-          });
-      });
+        var db = this.db;
+        var photo = {
+            title: 'Hello World',
+            path: 'hello-world.png'
+        };
+        persistence.getAllPhotos(db).then(function(count) {
+            assert.same(count, 0);
+            persistence.addPhoto(photo, db).then(function(res) {
+                assert.same(res.comments.length, 0);
+                persistence.getAllPhotos(db).then(function(count) {
+                    assert.same(1, count);
+                    done();
+                });
+            });
+        });
     },
     'it should refute if required attr are not filled in': function(done) {
-          persistence.addPhoto({}, this.db).then(undefined, function(e) {
-              assert(e);
-              done();
-          });
+        persistence.addPhoto({}, this.db).then(undefined, function(e) {
+            assert(e);
+            done();
+        });
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-//describe('persistence', function(){
-
-    //beforeEach(function(done) {
-    //});
-
-    //it('should add a photo to mongodb', function(done){
-    //});
-//});
-
