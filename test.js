@@ -8,8 +8,8 @@ var persistence = require('./persistence.js');
 
 var client = knox.createClient({
     key: settings.AMAZON_S3_KEY
-    , secret: settings.AMAZON_S3_SECRET
-    , bucket: settings.AMAZON_S3_BUCKET
+  , secret: settings.AMAZON_S3_SECRET
+  , bucket: settings.AMAZON_S3_BUCKET
 });
 
 var logo = fs.readFileSync('./logo.png')
@@ -34,39 +34,43 @@ buster.testCase('utils', {
 });
 
 buster.testCase('persistence', {
-    setUp : function(done) {
-        this.timeout = 1000;
-        var _this = this;
-        MongoClient.connect(settings.MONGO_URL_TEST, function(err, _db) {
-            _db.collection('photos', function(err, coll) {
-                coll.remove(function(err, coll) {
-                    _this.db = _db;
-                    done();
-                });;
-            });
+    setUp : function() {
+        this.timeout = 2000;
+        this.photoCollection = new persistence.PhotosCollection({
+            mongoUrl: settings.MONGO_URL_TEST,
+            collectionName: 'photos'
         });
     },
     'it should add a photo to mongodb' : function(done) {
-        var db = this.db;
-        var photo = {
-            title: 'Hello World',
-            path: 'hello-world.png'
-        };
-        persistence.getAllPhotos(db).then(function(count) {
-            assert.same(count, 0);
-            persistence.addPhoto(photo, db).then(function(res) {
-                assert.same(res.comments.length, 0);
-                persistence.getAllPhotos(db).then(function(count) {
-                    assert.same(1, count);
-                    done();
-                });
-            });
-        });
-    },
-    'it should refute if required attr are not filled in': function(done) {
-        persistence.addPhoto({}, this.db).then(undefined, function(e) {
-            assert(e);
-            done();
-        });
+      var photo = {
+          title: 'Hello World',
+          path: 'hello-world.png'
+      };
+      this.photoCollection.getAllPhotos().then(function(count) {
+          assert.same(count, 0);
+          done();
+      });
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+//describe('persistence', function(){
+
+    //beforeEach(function(done) {
+    //});
+
+    //it('should add a photo to mongodb', function(done){
+    //});
+//});
+
