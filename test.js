@@ -16,7 +16,7 @@ var logo = fs.readFileSync('./logo.png')
 
 buster.testCase('utils', {
     setUp : function() {
-        this.timeout = 2000;
+        this.timeout = 1000;
     },
     'it should return a string' : function() {
         var url = utils.createSignedS3Url(client, '/hello/world');
@@ -34,9 +34,9 @@ buster.testCase('utils', {
 });
 
 buster.testCase('persistence', {
-    setUp : function() {
+    setUp : function(done) {
         var _this = this;
-        this.timeout = 2000;
+        this.timeout = 1000;
         MongoClient.connect(settings.MONGO_URL_TEST, function(err, db) {
             db.collection('photos', function(err, coll) {
                 _this.photoCollection = new persistence.PhotosCollection({
@@ -53,8 +53,8 @@ buster.testCase('persistence', {
           title: 'Hello World',
           path: 'hello-world.png'
       };
-      this.photoCollection.getAllPhotos().then(function(count) {
-          assert.same(count, 0);
+      this.photoCollection.getAllPhotos().then(function(photos) {
+          assert.same(photos.length, 0);
           done();
       });
     }

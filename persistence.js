@@ -27,9 +27,9 @@ var PhotosCollection = function(opts) {
     this.getAllPhotos = function() {
         var d = Q.defer();
         Q.when(getCollection()).then(function(coll) {
-            coll.count(function(err, count) {
+            coll.find(function(err, cursor) {
                 if (err) d.reject(err);
-                d.resolve(count);
+                d.resolve(cursor.items);
             });
         }, d.reject);
         return d.promise;
