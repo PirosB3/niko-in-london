@@ -24,12 +24,26 @@ var PhotosCollection = function(opts) {
         return d.promise;
     };
 
+    this.addPhoto = function(photo) {
+        var d = Q.defer();
+        Q.when(getCollection()).then(function(coll) {
+            if (!(photo.title && photo.path)) return d.reject(new Error("Path and Title must be defined"));
+             coll.insert(_.extend({
+                 comments : []
+             }, photo), function(err, res) {
+                 if (err) return d.reject(err);
+                 d.resolve(res[0]);
+             });
+        }, d.reject);
+        return d.promise;
+    };
+
     this.getAllPhotos = function() {
         var d = Q.defer();
         Q.when(getCollection()).then(function(coll) {
-            coll.find(function(err, cursor) {
+            coll.find().toArray(function(err, cursor) {
                 if (err) d.reject(err);
-                d.resolve(cursor.items);
+                d.resolve(cursor);
             });
         }, d.reject);
         return d.promise;

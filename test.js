@@ -36,7 +36,6 @@ buster.testCase('utils', {
 buster.testCase('persistence', {
     setUp : function(done) {
         var _this = this;
-        this.timeout = 1000;
         MongoClient.connect(settings.MONGO_URL_TEST, function(err, db) {
             db.collection('photos', function(err, coll) {
                 _this.photoCollection = new persistence.PhotosCollection({
@@ -53,31 +52,17 @@ buster.testCase('persistence', {
           title: 'Hello World',
           path: 'hello-world.png'
       };
-      this.photoCollection.getAllPhotos().then(function(photos) {
+      var _this = this;
+      _this.photoCollection.getAllPhotos().then(function(photos) {
           assert.same(photos.length, 0);
-          done();
+          _this.photoCollection.addPhoto(photo).then(function(result) {
+              assert.same(result.comments.length, 0);
+              assert(result._id);
+              _this.photoCollection.getAllPhotos().then(function(photos) {
+                  assert.same(photos.length, 1);
+                  done();
+              });
+          });
       });
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-//describe('persistence', function(){
-
-    //beforeEach(function(done) {
-    //});
-
-    //it('should add a photo to mongodb', function(done){
-    //});
-//});
-
