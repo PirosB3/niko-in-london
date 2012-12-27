@@ -35,10 +35,17 @@ buster.testCase('utils', {
 
 buster.testCase('persistence', {
     setUp : function() {
+        var _this = this;
         this.timeout = 2000;
-        this.photoCollection = new persistence.PhotosCollection({
-            mongoUrl: settings.MONGO_URL_TEST,
-            collectionName: 'photos'
+        MongoClient.connect(settings.MONGO_URL_TEST, function(err, db) {
+            db.collection('photos', function(err, coll) {
+                _this.photoCollection = new persistence.PhotosCollection({
+                    collection: coll
+                });
+                coll.remove(function() {
+                    done();
+                });
+            });
         });
     },
     'it should add a photo to mongodb' : function(done) {

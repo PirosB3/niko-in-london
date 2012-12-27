@@ -3,11 +3,12 @@ var _ = require('underscore')._;
 var MongoClient = require('mongodb').MongoClient;
 
 var PhotosCollection = function(opts) {
-    if(!(opts.mongoUrl && opts.collectionName)) {
+    if(!(opts.collection || (opts.mongoUrl && opts.collectionName))) {
         throw new Error("mongoUrl and collectionName must be specified");
     }
-
     var collection;
+    if (opts.collection) collection = opts.collection;
+
     var getCollection = function() {
         if (collection) return collection;
 
