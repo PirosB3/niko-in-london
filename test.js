@@ -74,7 +74,7 @@ buster.testCase('persistence', {
       var comment = {
           userId : 'daniel-pyrathon',
           body: 'bella foto!'
-      }
+      };
       var _this = this;
       _this.photoCollection.addPhoto(photo).then(function(result) {
         _this.photoCollection.addCommentForPhotoID(result._id.toString(), comment).then(function(result) {
@@ -82,6 +82,16 @@ buster.testCase('persistence', {
             assert.same(result.comments[0].body, 'bella foto!');
             done();
         });
+      });
+    },
+    'if photo non existant should fail' : function(done) {
+      var comment = {
+          userId : 'daniel-pyrathon',
+          body: 'bella foto!'
+      };
+      this.photoCollection.addCommentForPhotoID('nonexisting', comment).then(undefined, function(e) {
+          assert(e);
+          done();
       });
     }
 });

@@ -52,18 +52,21 @@ var PhotosCollection = function(opts) {
 
     this.addCommentForPhotoID = function(photoId, comment) {
         var d = Q.defer();
-        if (!(comment.body && comment.userId)) return d.reject(new Error("Path and Title must be defined"));
-        Q.when(getCollection()).then(function(coll) {
-            coll.findAndModify(
-                { _id: new ObjectID(photoId) }, [],
-                { $push: {comments: comment} },
-                { new: true },
-                function(err, object) {
-                    if (err) return d.reject(err);
-                    d.resolve(object);
-                }
-            );
-        }, d.reject);
+        if (!(comment.body && comment.userId)) return d.reject(new Error("Body and UserID must be defined"));
+        try {
+            var objectID = new ObjectID(photoId);
+            Q.when(getCollection()).then(function(coll) {
+                coll.findAndModify(
+                    { _id: objectID }, [],
+                    { $push: {comments: comment} },
+                    { new: true },
+                    function(err, object) {
+                        if (err) return d.reject(err);
+                        d.resolve(object);
+                    }
+                );
+            }, d.reject);
+        } catch (e) { d.reject(e); }
         return d.promise;
     }
 }
