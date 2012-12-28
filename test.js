@@ -35,6 +35,7 @@ buster.testCase('utils', {
 
 buster.testCase('persistence', {
     setUp : function(done) {
+        this.timeout = 1000;
         var _this = this;
         MongoClient.connect(settings.MONGO_URL_TEST, function(err, db) {
             db.collection('photos', function(err, coll) {
@@ -63,6 +64,24 @@ buster.testCase('persistence', {
                   done();
               });
           });
+      });
+    },
+    'it should add a comment to an existing photo' : function(done) {
+      var photo = {
+          title: 'Hello World',
+          path: 'hello-world.png'
+      };
+      var comment = {
+          userId : 'daniel-pyrathon',
+          body: 'bella foto!'
+      }
+      var _this = this;
+      _this.photoCollection.addPhoto(photo).then(function(result) {
+        _this.photoCollection.addCommentForPhotoID(result._id.toString(), comment).then(function(result) {
+            assert.same(result.title, 'Hello World');
+            assert.same(result.comments[0].body, 'bella foto!');
+            done();
+        });
       });
     }
 });
