@@ -2,12 +2,12 @@ var config = module.exports;
 
 config["My tests"] = {
     env: "node",
-    rootPath: "./",
+    rootPath: "../",
     sources: [
-        "utils.js",
-        "persistence.js"
+        "libs/utils.js",
+        "libs/persistence.js"
     ],
     tests: [
-        "test.js"
+        "test/test.js"
     ]
 };

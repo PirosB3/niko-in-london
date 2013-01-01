@@ -1,7 +1,6 @@
 var Q = require('q');
-var settings = require('./settings.js').settings;
 
-function _getFileExtension(filename) {
+var getFileExtension = function(filename) {
     var i = filename.lastIndexOf('.');
     return (i < 0) ? '' : filename.substr(i);
 };
@@ -12,11 +11,11 @@ var createSignedS3Url = function(client, url) {
     return client.signedUrl(url, expiration);
 };
 
-var storeImageInS3 = function(client, imageName, imageBuffer) {
+var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
 
-    var filePath = settings.IMAGE_UPLOAD_DIR + imageName;
+    var filePath = imageUploadDir + imageName;
     var headers = {
-      'Content-Type': 'image/' + _getFileExtension(imageName)
+      'Content-Type': 'image/' + getFileExtension(imageName)
     };
 
     var d = Q.defer();

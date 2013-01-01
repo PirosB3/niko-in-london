@@ -107,7 +107,7 @@ var Persistence = function(opts) {
             )).then(d.resolve, d.reject);
         }, d.reject);
         return d.promise;
-    }
+    };
 }
 
 exports.Persistence = Persistence;

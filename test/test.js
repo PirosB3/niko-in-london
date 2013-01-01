@@ -3,8 +3,9 @@ var knox = require('knox');
 var fs = require('fs');
 var MongoClient = require('mongodb').MongoClient;
 
-var utils = require('./utils.js');
-var persistence = require('./persistence.js');
+var utils = require('../libs/utils.js');
+var persistence = require('../libs/persistence.js');
+var settings = require('../settings.js').settings;
 
 var client = knox.createClient({
     key: settings.AMAZON_S3_KEY
@@ -23,7 +24,7 @@ buster.testCase('utils', {
         assert.same(typeof url, 'string');
     },
     'it should return true' : function(done) {
-        var path = utils.storeImageInS3(client, 'nodejs-logo.png', logo);
+        var path = utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, 'nodejs-logo.png', logo);
         path.then(function(imageName) {
             assert.same(imageName, 'nodejs-logo.png');
             done();
