@@ -38,6 +38,20 @@ var Persistence = function(opts) {
         return d.promise;
     };
 
+    var findAndModifyPromise = function(coll, query, update, opts) {
+        var d = Q.defer();
+        coll.findAndModify(
+            query, [],
+            update,
+            _.extend(opts || {}, { new: true }),
+            function(err, object) {
+                if (err) return d.reject(err);
+                d.resolve(object);
+            }
+        );
+        return d.promise;
+    }
+
     this.addPhoto = function(photo) {
         var d = Q.defer();
         Q.when(getCollection('photos')).then(function(coll) {
@@ -71,15 +85,11 @@ var Persistence = function(opts) {
             var objectID = new ObjectID(photoId);
             comment['date_added'] = new Date;
             Q.when(getCollection('photos')).then(function(coll) {
-                coll.findAndModify(
-                    { _id: objectID }, [],
-                    { $push: {comments: comment} },
-                    { new: true },
-                    function(err, object) {
-                        if (err) return d.reject(err);
-                        d.resolve(object);
-                    }
-                );
+                Q.when(findAndModifyPromise(
+                    coll,
+                    { _id: objectID },
+                    { $push: {comments: comment} }
+                )).then(d.resolve, d.reject);
             }, d.reject);
         } catch (e) { d.reject(e); }
         return d.promise;
@@ -89,15 +99,12 @@ var Persistence = function(opts) {
         var d = Q.defer();
         if (!(user.id && user.name)) return d.reject(new Error("ID and name must be defined"));
         Q.when(getCollection('users')).then(function(coll) {
-            coll.findAndModify(
-                { id : user.id }, [],
+            Q.when(findAndModifyPromise(
+                coll,
+                { id : user.id },
                 { $set: user },
-                { new: true, upsert: true },
-                function(err, object) {
-                    if (err) return d.reject(err);
-                    d.resolve(object);
-                }
-            );
+                { upsert: true }
+            )).then(d.resolve, d.reject);
         }, d.reject);
         return d.promise;
     }
