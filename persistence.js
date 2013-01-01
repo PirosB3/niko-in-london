@@ -43,7 +43,8 @@ var Persistence = function(opts) {
         Q.when(getCollection('photos')).then(function(coll) {
             if (!(photo.title && photo.path)) return d.reject(new Error("Path and Title must be defined"));
              coll.insert(_.extend({
-                 comments : []
+                 comments : [],
+                 date_added : new Date
              }, photo), function(err, res) {
                  if (err) return d.reject(err);
                  d.resolve(res[0]);
@@ -68,6 +69,7 @@ var Persistence = function(opts) {
         if (!(comment.body && comment.userId)) return d.reject(new Error("Body and UserID must be defined"));
         try {
             var objectID = new ObjectID(photoId);
+            comment['date_added'] = new Date;
             Q.when(getCollection('photos')).then(function(coll) {
                 coll.findAndModify(
                     { _id: objectID }, [],

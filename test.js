@@ -57,6 +57,7 @@ buster.testCase('persistence', {
           _this.persistence.addPhoto(photo).then(function(result) {
               assert.same(result.comments.length, 0);
               assert(result._id);
+              assert(result.date_added);
               _this.persistence.getAllPhotos().then(function(photos) {
                   assert.same(photos.length, 1);
                   done();
@@ -77,6 +78,7 @@ buster.testCase('persistence', {
       _this.persistence.addPhoto(photo).then(function(result) {
         _this.persistence.addCommentForPhotoID(result._id.toString(), comment).then(function(result) {
             assert.same(result.title, 'Hello World');
+            assert(result.comments[0].date_added);
             assert.same(result.comments[0].body, 'bella foto!');
             done();
         });
