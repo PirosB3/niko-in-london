@@ -38,13 +38,11 @@ buster.testCase('persistence', {
         this.timeout = 1000;
         var _this = this;
         MongoClient.connect(settings.MONGO_URL_TEST, function(err, db) {
+            _this.persistence = new persistence.Persistence({
+                database: db
+            });
             db.collection('photos', function(err, coll) {
-                _this.photoCollection = new persistence.PhotosCollection({
-                    collection: coll
-                });
-                coll.remove(function() {
-                    done();
-                });
+                coll.remove(done);
             });
         });
     },
@@ -54,12 +52,12 @@ buster.testCase('persistence', {
           path: 'hello-world.png'
       };
       var _this = this;
-      _this.photoCollection.getAllPhotos().then(function(photos) {
+      _this.persistence.getAllPhotos().then(function(photos) {
           assert.same(photos.length, 0);
-          _this.photoCollection.addPhoto(photo).then(function(result) {
+          _this.persistence.addPhoto(photo).then(function(result) {
               assert.same(result.comments.length, 0);
               assert(result._id);
-              _this.photoCollection.getAllPhotos().then(function(photos) {
+              _this.persistence.getAllPhotos().then(function(photos) {
                   assert.same(photos.length, 1);
                   done();
               });
@@ -76,8 +74,8 @@ buster.testCase('persistence', {
           body: 'bella foto!'
       };
       var _this = this;
-      _this.photoCollection.addPhoto(photo).then(function(result) {
-        _this.photoCollection.addCommentForPhotoID(result._id.toString(), comment).then(function(result) {
+      _this.persistence.addPhoto(photo).then(function(result) {
+        _this.persistence.addCommentForPhotoID(result._id.toString(), comment).then(function(result) {
             assert.same(result.title, 'Hello World');
             assert.same(result.comments[0].body, 'bella foto!');
             done();
@@ -89,9 +87,24 @@ buster.testCase('persistence', {
           userId : 'daniel-pyrathon',
           body: 'bella foto!'
       };
-      this.photoCollection.addCommentForPhotoID('nonexisting', comment).then(undefined, function(e) {
+      this.persistence.addCommentForPhotoID('nonexisting', comment).then(undefined, function(e) {
           assert(e);
           done();
       });
+    },
+    'it should retrieve or add a new user' : function(done) {
+        var user = {
+            id: '126318927',
+            name : 'Daniel Pyrathon'
+        };
+        var _this = this;
+        _this.persistence.upsertUser(user).then(function(res) {
+            assert.same(res.id, '126318927');
+            var _id = res._id;
+            _this.persistence.upsertUser(user).then(function(res) {
+                assert.same(res._id.toString(), _id.toString());
+                done();
+            });
+        });
     }
 });
