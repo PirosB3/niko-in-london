@@ -4,8 +4,8 @@ var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
 var Persistence = function(opts) {
-    if(!(opts.database || (opts.mongoUrl && opts.collectionName))) {
-        throw new Error("mongoUrl and collectionName must be specified");
+    if(!(opts.database || opts.mongoUrl)) {
+        throw new Error("mongoUrl or database must be specified");
     }
 
     collections = {};
@@ -61,7 +61,9 @@ var Persistence = function(opts) {
                  date_added : new Date
              }, photo), function(err, res) {
                  if (err) return d.reject(err);
-                 d.resolve(res[0]);
+                 var newPhoto = res[0];
+                 if (opts.pathDecorator) { newPhoto.path = opts.pathDecorator(newPhoto.path); }
+                 d.resolve(newPhoto);
              });
         }, d.reject);
         return d.promise;
@@ -70,9 +72,15 @@ var Persistence = function(opts) {
     this.getAllPhotos = function() {
         var d = Q.defer();
         Q.when(getCollection('photos')).then(function(coll) {
-            coll.find().toArray(function(err, cursor) {
+            coll.find().toArray(function(err, photos) {
                 if (err) return d.reject(err);
-                d.resolve(cursor);
+                if (opts.pathDecorator) {
+                    photos = _.map(photos, function(el) {
+                        el.path = opts.pathDecorator(el.path);
+                        return el;
+                    });
+                }
+                d.resolve(photos);
             });
         }, d.reject);
         return d.promise;
@@ -89,7 +97,12 @@ var Persistence = function(opts) {
                     coll,
                     { _id: objectID },
                     { $push: {comments: comment} }
-                )).then(d.resolve, d.reject);
+                )).then(function(res) {
+                    if (opts.pathDecorator) {
+                        res.path = opts.pathDecorator(res.path);
+                        d.resolve(res);
+                    }
+                }, d.reject);
             }, d.reject);
         } catch (e) { d.reject(e); }
         return d.promise;

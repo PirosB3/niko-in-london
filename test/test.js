@@ -20,8 +20,10 @@ buster.testCase('utils', {
         this.timeout = 1000;
     },
     'it should return a string' : function() {
-        var url = utils.createSignedS3Url(client, '/hello/world');
+        var pathDecorator = utils.createSignedS3Decorator(client);
+        var url = pathDecorator('/hello/world');
         assert.same(typeof url, 'string');
+        assert(/^http/.test(url));
     },
     'it should return true' : function(done) {
         var path = utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, 'nodejs-logo.png', logo);
@@ -40,7 +42,8 @@ buster.testCase('persistence', {
         var _this = this;
         MongoClient.connect(settings.MONGO_URL_TEST, function(err, db) {
             _this.persistence = new persistence.Persistence({
-                database: db
+                database: db,
+                pathDecorator : utils.createSignedS3Decorator(client)
             });
             db.collection('photos', function(err, coll) {
                 coll.remove(done);
@@ -59,8 +62,10 @@ buster.testCase('persistence', {
               assert.same(result.comments.length, 0);
               assert(result._id);
               assert(result.date_added);
+              assert(/^http/.test(result.path));
               _this.persistence.getAllPhotos().then(function(photos) {
                   assert.same(photos.length, 1);
+                  assert(/^http/.test(photos[0].path));
                   done();
               });
           });
@@ -79,6 +84,7 @@ buster.testCase('persistence', {
       _this.persistence.addPhoto(photo).then(function(result) {
         _this.persistence.addCommentForPhotoID(result._id.toString(), comment).then(function(result) {
             assert.same(result.title, 'Hello World');
+            assert(/^http/.test(result.path));
             assert(result.comments[0].date_added);
             assert.same(result.comments[0].body, 'bella foto!');
             done();

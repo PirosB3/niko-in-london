@@ -5,11 +5,13 @@ var getFileExtension = function(filename) {
     return (i < 0) ? '' : filename.substr(i);
 };
 
-var createSignedS3Url = function(client, url) {
-    var expiration = new Date();
-    expiration.setMinutes(expiration.getMinutes() + 30);
-    return client.signedUrl(url, expiration);
-};
+var createSignedS3Decorator = function(client) {
+    return function(url) {
+        var expiration = new Date();
+        expiration.setMinutes(expiration.getMinutes() + 30);
+        return client.signedUrl(url, expiration);
+    };
+}
 
 var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
 
@@ -25,5 +27,5 @@ var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
     return d.promise;
 };
 
-exports.createSignedS3Url = createSignedS3Url;
+exports.createSignedS3Decorator = createSignedS3Decorator;
 exports.storeImageInS3 = storeImageInS3;
