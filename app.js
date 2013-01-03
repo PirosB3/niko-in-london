@@ -11,13 +11,14 @@ var express = require('express')
 
 
 var app = express();
-var persistence = new Persistence({
-    mongoUrl: settings.MONGO_URL
-});
 var client = knox.createClient({
     key: settings.AMAZON_S3_KEY
   , secret: settings.AMAZON_S3_SECRET
   , bucket: settings.AMAZON_S3_BUCKET
+});
+var persistence = new Persistence({
+    mongoUrl: settings.MONGO_URL,
+    pathDecorator : utils.createSignedS3Decorator(client)
 });
 
 app.configure(function(){
@@ -53,6 +54,18 @@ app.put('/photos/create', function(req, res) {
                 res.json(500, { error: 'There was an issue uploading your photo' });
             });
         });
+});
+
+app.put('/photos/:id/comments/create', function(req, res) {
+    if (!req.body.body) {
+        return res.json({ error: 'You must specify a comment body' });
+    }
+    Q.when(persistence.addCommentForPhotoID(req.params.id, {
+        body: req.body.body,
+        userId: 'daniel-pyrathon'
+    })).then(_.bind(res.json, res), function(err) {
+        res.json({ error: 'There was an issue inserting your comment on photo ' + req.params.id });
+    });
 });
 
 http.createServer(app).listen(app.get('port'), function(){

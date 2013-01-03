@@ -28,7 +28,7 @@ buster.testCase('utils', {
     'it should return true' : function(done) {
         var path = utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, 'nodejs-logo.png', logo);
         path.then(function(imageName) {
-            assert.same(imageName, 'nodejs-logo.png');
+            assert.same(imageName, '/images/nodejs-logo.png');
             done();
         }, function(e) {
             throw e;
