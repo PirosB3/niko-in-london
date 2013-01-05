@@ -23,6 +23,8 @@ var persistence = new Persistence({
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
+  app.set('views', __dirname + '/templates');
+  app.set('view engine', 'jade');
   app.use(express.bodyParser());
   app.use(express.favicon());
   app.use(express.logger('dev'));
@@ -38,7 +40,7 @@ app.get('/photos', function(req, res) {
     );
 });
 
-app.put('/photos/create', function(req, res) {
+app.post('/photos/create', function(req, res) {
     if (!(req.files.image && req.body.title)) {
         return res.json({ error: 'You must specify an image and a title' });
     }
@@ -56,7 +58,7 @@ app.put('/photos/create', function(req, res) {
         });
 });
 
-app.put('/photos/:id/comments/create', function(req, res) {
+app.post('/photos/:id/comments/create', function(req, res) {
     if (!req.body.body) {
         return res.json({ error: 'You must specify a comment body' });
     }
@@ -66,6 +68,10 @@ app.put('/photos/:id/comments/create', function(req, res) {
     })).then(_.bind(res.json, res), function(err) {
         res.json({ error: 'There was an issue inserting your comment on photo ' + req.params.id });
     });
+});
+
+app.get('*', function(req, res) {
+    res.render('index', {});
 });
 
 http.createServer(app).listen(app.get('port'), function(){

@@ -97,12 +97,7 @@ var Persistence = function(opts) {
                     coll,
                     { _id: objectID },
                     { $push: {comments: comment} }
-                )).then(function(res) {
-                    if (opts.pathDecorator) {
-                        res.path = opts.pathDecorator(res.path);
-                        d.resolve(res);
-                    }
-                }, d.reject);
+                )).then(function() { d.resolve(comment); }, d.reject);
             }, d.reject);
         } catch (e) { d.reject(e); }
         return d.promise;

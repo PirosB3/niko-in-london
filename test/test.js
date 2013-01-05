@@ -33,6 +33,12 @@ buster.testCase('utils', {
         }, function(e) {
             throw e;
         });
+    },
+    'it should return the correct content type' : function() {
+        assert.same(utils.getContentType('lorem.jpg'), 'image/jpeg');
+        assert.same(utils.getContentType('LOREM.PNG'), 'image/png');
+        assert.same(utils.getContentType('lorem.gif'), 'image/gif');
+        assert.same(utils.getContentType('lorem.lol'), null);
     }
 });
 
