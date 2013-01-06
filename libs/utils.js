@@ -1,9 +1,17 @@
 var Q = require('q');
 
-var getFileExtension = function(filename) {
-    var i = filename.lastIndexOf('.');
-    return (i < 0) ? '' : filename.substr(i);
+var FILE_EXTENSIONS = {
+    'jpg' : 'image/jpeg',
+    'png' : 'image/png',
+    'gif' : 'image/gif'
 };
+
+var getContentType = function(imageName) {
+    var i = imageName.lastIndexOf('.');
+    if (i < 0) return null;
+    var format = imageName.substr(i+1).toLowerCase();
+    return FILE_EXTENSIONS[format] || null;
+}
 
 var createSignedS3Decorator = function(client) {
     return function(url) {
@@ -17,7 +25,7 @@ var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
 
     var filePath = imageUploadDir + imageName;
     var headers = {
-      'Content-Type': 'image/' + getFileExtension(imageName)
+      'Content-Type': getContentType(imageName)
     };
 
     var d = Q.defer();
@@ -29,3 +37,4 @@ var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
 
 exports.createSignedS3Decorator = createSignedS3Decorator;
 exports.storeImageInS3 = storeImageInS3;
+exports.getContentType = getContentType;
