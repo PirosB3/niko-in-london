@@ -6,11 +6,10 @@ var FILE_EXTENSIONS = {
     'gif' : 'image/gif'
 };
 
-var getContentType = function(imageName) {
+var getFormat = function(imageName) {
     var i = imageName.lastIndexOf('.');
     if (i < 0) return null;
-    var format = imageName.substr(i+1).toLowerCase();
-    return FILE_EXTENSIONS[format] || null;
+    return imageName.substr(i+1).toLowerCase();
 }
 
 var createSignedS3Decorator = function(client) {
@@ -23,12 +22,15 @@ var createSignedS3Decorator = function(client) {
 
 var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
 
+    var d = Q.defer();
     var filePath = imageUploadDir + imageName;
+    var format = getFormat(imageName);
+    if (!FILE_EXTENSIONS[format]) return d.reject("File format not recognized");
+
     var headers = {
-      'Content-Type': getContentType(imageName)
+      'Content-Type': FILE_EXTENSIONS[format]
     };
 
-    var d = Q.defer();
     client.putBuffer(imageBuffer, filePath, headers, function(err, res) {
         !err && (res.statusCode === 200) ? d.resolve(filePath) : d.reject(err);
     });
