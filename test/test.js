@@ -41,18 +41,19 @@ buster.testCase('utils', {
         assert.same(f.getName(), 'logo');
         assert.same(f.getFormat(), 'PNG');
         assert.same(f.getContentType(), 'image/png');
+    },
+    "it should be able to resize photos" : function(done) {
+        var f = new utils.FileDescriptor('./logo.png');
+        utils.resizePhoto(f).then(function(f2) {
+            assert.same(f2.getName(), 'logo-compressed');
+            done();
+        });
     }
-    //"it should be able to resize photos" : function(done) {
-        //utils.resizePhoto('./logo.jpg').then(function(path) {
-            //assert(path.endsWith('logo-resized.jpg'));
-            //done();
-        //});
-    //}
 });
 
 buster.testCase('persistence', {
     setUp : function(done) {
-        this.timeout = 3000;
+        this.timeout = 1000;
         var _this = this;
         MongoClient.connect(settings.MONGO_URL_TEST, function(err, db) {
             _this.persistence = new persistence.Persistence({

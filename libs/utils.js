@@ -32,6 +32,18 @@ var createSignedS3Decorator = function(client) {
     };
 }
 
+var resizePhoto = function(fileObject) {
+    var oldFile = fileObject.getPath();
+    var newFile = '/tmp/' + fileObject.getName() + '-compressed.' + fileObject.getFormat();
+    var command = 'convert ' + oldFile + ' -resize 300 ' + newFile;
+
+    var d = Q.defer();
+    exec(command, function(err, stdout, stderr) {
+        err ? d.reject(stderr) : d.resolve(new FileDescriptor(newFile));
+    });
+    return d.promise;
+}
+
 var storeImageInS3 = function(imageUploadDir, client, fileObject, imageBuffer) {
 
     var d = Q.defer();
@@ -50,4 +62,4 @@ var storeImageInS3 = function(imageUploadDir, client, fileObject, imageBuffer) {
 exports.createSignedS3Decorator = createSignedS3Decorator;
 exports.storeImageInS3 = storeImageInS3;
 exports.FileDescriptor = FileDescriptor;
-//exports.getContentType = getContentType;
+exports.resizePhoto = resizePhoto;
