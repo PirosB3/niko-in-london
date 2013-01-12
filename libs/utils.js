@@ -1,3 +1,5 @@
+var exec = require('child_process').exec;
+var resolve = require('path').resolve;
 var Q = require('q');
 
 var FILE_EXTENSIONS = {
@@ -6,10 +8,20 @@ var FILE_EXTENSIONS = {
     'gif' : 'image/gif'
 };
 
-var getFormat = function(imageName) {
-    var i = imageName.lastIndexOf('.');
-    if (i < 0) return null;
-    return imageName.substr(i+1).toLowerCase();
+var fileNameRe = /.*\/(.+)$/;
+
+var FileDescriptor = function(filePath) {
+    var absolutePath = resolve(filePath);
+    var i = absolutePath.lastIndexOf('.');
+    if (!i) throw new Error("File cannot be found");
+    var extension = absolutePath.substr(i+1);
+    var fileName = absolutePath.substr(0, i).match(fileNameRe)[1];
+    var contentType = FILE_EXTENSIONS[extension.toLowerCase()];
+
+    this.getPath = function() { return absolutePath; }
+    this.getName = function() { return fileName; }
+    this.getFormat = function() { return extension; }
+    this.getContentType = function() { return contentType; }
 }
 
 var createSignedS3Decorator = function(client) {
@@ -20,15 +32,13 @@ var createSignedS3Decorator = function(client) {
     };
 }
 
-var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
+var storeImageInS3 = function(imageUploadDir, client, fileObject, imageBuffer) {
 
     var d = Q.defer();
-    var filePath = imageUploadDir + imageName;
-    var format = getFormat(imageName);
-    if (!FILE_EXTENSIONS[format]) return d.reject("File format not recognized");
+    var filePath = imageUploadDir + fileObject.getName() + '.' + fileObject.getFormat();
 
     var headers = {
-      'Content-Type': FILE_EXTENSIONS[format]
+      'Content-Type': fileObject.getContentType()
     };
 
     client.putBuffer(imageBuffer, filePath, headers, function(err, res) {
@@ -39,4 +49,5 @@ var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
 
 exports.createSignedS3Decorator = createSignedS3Decorator;
 exports.storeImageInS3 = storeImageInS3;
-exports.getContentType = getContentType;
+exports.FileDescriptor = FileDescriptor;
+//exports.getContentType = getContentType;

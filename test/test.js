@@ -26,7 +26,8 @@ buster.testCase('utils', {
         assert(/^http/.test(url));
     },
     'it should return true' : function(done) {
-        var path = utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, 'nodejs-logo.png', logo);
+        var fileObject = new utils.FileDescriptor('nodejs-logo.png');
+        var path = utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, fileObject, logo);
         path.then(function(imageName) {
             assert.same(imageName, '/images/nodejs-logo.png');
             done();
@@ -34,17 +35,24 @@ buster.testCase('utils', {
             throw e;
         });
     },
-    'it should return the correct content type' : function() {
-        assert.same(utils.getContentType('lorem.jpg'), 'image/jpeg');
-        assert.same(utils.getContentType('LOREM.PNG'), 'image/png');
-        assert.same(utils.getContentType('lorem.gif'), 'image/gif');
-        assert.same(utils.getContentType('lorem.lol'), null);
+    'File object should contain all information regarding file from path' : function() {
+        var f = new utils.FileDescriptor('./logo.PNG');
+        assert(/test\/logo.PNG$/.test(f.getPath()));
+        assert.same(f.getName(), 'logo');
+        assert.same(f.getFormat(), 'PNG');
+        assert.same(f.getContentType(), 'image/png');
     }
+    //"it should be able to resize photos" : function(done) {
+        //utils.resizePhoto('./logo.jpg').then(function(path) {
+            //assert(path.endsWith('logo-resized.jpg'));
+            //done();
+        //});
+    //}
 });
 
 buster.testCase('persistence', {
     setUp : function(done) {
-        this.timeout = 1000;
+        this.timeout = 3000;
         var _this = this;
         MongoClient.connect(settings.MONGO_URL_TEST, function(err, db) {
             _this.persistence = new persistence.Persistence({
@@ -89,10 +97,9 @@ buster.testCase('persistence', {
       var _this = this;
       _this.persistence.addPhoto(photo).then(function(result) {
         _this.persistence.addCommentForPhotoID(result._id.toString(), comment).then(function(result) {
-            assert.same(result.title, 'Hello World');
-            assert(/^http/.test(result.path));
-            assert(result.comments[0].date_added);
-            assert.same(result.comments[0].body, 'bella foto!');
+            assert(result.date_added);
+            assert.same(result.userId, 'daniel-pyrathon');
+            assert.same(result.body, 'bella foto!');
             done();
         });
       });
