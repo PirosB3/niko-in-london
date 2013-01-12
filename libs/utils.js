@@ -39,4 +39,3 @@ var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
 
 exports.createSignedS3Decorator = createSignedS3Decorator;
 exports.storeImageInS3 = storeImageInS3;
-exports.getContentType = getContentType;

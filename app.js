@@ -1,6 +1,7 @@
 var express = require('express')
   , http = require('http')
   , fs = require('fs')
+  , path = require('path')
 
   , Q = require('q')
   , _ = require('underscore')._
@@ -28,6 +29,7 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(express.favicon());
   app.use(express.logger('dev'));
+  app.use(express.static(path.join(__dirname, 'public')));
 });
 
 app.configure('development', function(){
@@ -58,7 +60,7 @@ app.post('/photos/create', function(req, res) {
         });
 });
 
-app.post('/photos/:id/comments/create', function(req, res) {
+app.post('/photos/:id/comments', function(req, res) {
     if (!req.body.body) {
         return res.json({ error: 'You must specify a comment body' });
     }

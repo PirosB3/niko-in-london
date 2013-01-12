@@ -24,7 +24,7 @@ describe('Niko In London', function() {
                 "_id": "50e49454471aaa4f4a000004"
             }
         ]);
-        httpBackend.whenPOST('photos/50e48d59471aaa4f4a000002/comments').respond({
+        httpBackend.whenPOST('photos/50e49454471aaa4f4a000003/comments').respond({
             body: 'your nice!',
             userId : 'daniel-pyrathon',
             date_added : new Date
@@ -49,7 +49,7 @@ describe('Niko In London', function() {
                 var c = new Comment({
                     body: 'your nice!'
                 });
-                c.$save( {photoId : '50e48d59471aaa4f4a000002'} );
+                c.$save( {photoId : '50e49454471aaa4f4a000003'} );
                 httpBackend.flush();
                 expect(c.date_added).toBeTruthy();
             });
@@ -65,25 +65,22 @@ describe('Niko In London', function() {
 
         it('should build the title based on the selected photo', function() {
             ctrl = controller(MainController, {$scope: scope, $routeParams : {
-                photo: {
-                    title: 'Lorem Ipsum'
-                }
+                photoId : "50e49454471aaa4f4a000003"
             }});
+            httpBackend.flush();
             inject(function($window, Comment) {
                 expect(scope.selectedPhoto).toBeTruthy();
                 expect(scope.newComment instanceof Comment).toBeTruthy();
-                expect($window.document.title).toEqual('Niko In London | Lorem Ipsum');
+                expect($window.document.title).toEqual('Niko In London | Sow B3');
             });
         });
 
         it('should create a new comment on new comment submitted', function() {
             inject(function(Photo) {
                 ctrl = controller(MainController, {$scope: scope, $routeParams : {
-                    photo: {
-                        _id: '50e48d59471aaa4f4a000002',
-                        comments : []
-                    }
+                    photoId : '50e49454471aaa4f4a000003'
                 }});
+                httpBackend.flush();
                 scope.newComment.body = 'Hello World!!';
                 scope.submitNewComment();
                 httpBackend.flush();
