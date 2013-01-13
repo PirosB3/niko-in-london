@@ -1,3 +1,5 @@
+var exec = require('child_process').exec;
+var resolve = require('path').resolve;
 var Q = require('q');
 
 var FILE_EXTENSIONS = {
@@ -6,10 +8,23 @@ var FILE_EXTENSIONS = {
     'gif' : 'image/gif'
 };
 
-var getFormat = function(imageName) {
-    var i = imageName.lastIndexOf('.');
-    if (i < 0) return null;
-    return imageName.substr(i+1).toLowerCase();
+var fileNameRe = /.*\/(.+)$/;
+
+var FileDescriptor = function(args) {
+    var absolutePath = resolve(args.path);
+    var fileName = args.fileName;
+
+    var i = fileName.lastIndexOf('.');
+    if (!i) throw new Error("File cannot be found");
+    var extension = fileName.substr(i+1);
+    var name = fileName.substr(0, i);
+    var contentType = args.contentType;
+
+    this.getPath = function() { return absolutePath; }
+    this.getName = function() { return name; }
+    this.getFormat = function() { return extension; }
+    this.getFileName = function() { return fileName; }
+    this.getContentType = function() { return contentType; }
 }
 
 var createSignedS3Decorator = function(client) {
@@ -20,18 +35,35 @@ var createSignedS3Decorator = function(client) {
     };
 }
 
-var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
+var resizePhoto = function(fileObject) {
+    var oldFile = fileObject.getPath();
+    var newFileName = fileObject.getName() + '-compressed.' + fileObject.getFormat();
+    var newFilePath = '/tmp/' + newFileName;
+    var command = 'convert ' + oldFile + ' -resize 300 ' + newFilePath;
 
     var d = Q.defer();
-    var filePath = imageUploadDir + imageName;
-    var format = getFormat(imageName);
-    if (!FILE_EXTENSIONS[format]) return d.reject("File format not recognized");
+    exec(command, function(err, stdout, stderr) {
+        err ? d.reject(stderr) : d.resolve(new FileDescriptor({
+            path: newFilePath,
+            fileName: newFileName,
+            contentType: fileObject.getFormat()
+        }));
+    });
+    return d.promise;
+}
+
+var storeImageInS3 = function(imageUploadDir, client, fileObject, imageBuffer) {
+
+    var d = Q.defer();
+    var filePath = imageUploadDir + fileObject.getFileName();
 
     var headers = {
-      'Content-Type': FILE_EXTENSIONS[format]
+      'Content-Type': fileObject.getContentType()
     };
 
+    debugger;
     client.putBuffer(imageBuffer, filePath, headers, function(err, res) {
+        console.log(res.statusCode);
         !err && (res.statusCode === 200) ? d.resolve(filePath) : d.reject(err);
     });
     return d.promise;
@@ -39,3 +71,5 @@ var storeImageInS3 = function(imageUploadDir, client, imageName, imageBuffer) {
 
 exports.createSignedS3Decorator = createSignedS3Decorator;
 exports.storeImageInS3 = storeImageInS3;
+exports.FileDescriptor = FileDescriptor;
+exports.resizePhoto = resizePhoto;
