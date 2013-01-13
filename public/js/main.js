@@ -1,15 +1,14 @@
 angular.module('nikoInLondon.services', ['ngResource']).
-    factory('photoService', function($resource, $q) {
-        var cache = null;
-        var photo = $resource('photos/:photoId', { photoId: '@_id'});
+    factory('Photo', function($resource, $q) {
+        var Photo = $resource('photos/:photoId', { photoId: '@_id'});
+        var cache;
         return {
-            Photo: photo,
             getPhotos: function() {
                 var def = $q.defer();
                 if (cache) {
                     def.resolve(cache);
                 } else {
-                    photo.query(function(res) {
+                    Photo.query(function(res) {
                         cache = res;
                         def.resolve(cache);
                     });
@@ -23,38 +22,54 @@ angular.module('nikoInLondon.services', ['ngResource']).
     });
 
 angular.module('nikoInLondon.directives', []).
-    directive('photo', function() {
+    directive('photoGrid', function() {
+        var linkFn = function(scope, element, attrs) {
+            element.masonry({
+                itemSelector: element.itemSelector,
+                columnWidth: 240,
+                animationOptions: {
+                  duration: 400
+                }
+            });
+        }
         return {
             restrict: 'E',
-            templateUrl: 'photo-template.html',
+            link: linkFn,
+            scope : {
+                itemSelector: '='
+            }
+        }
+    }).
+    directive('photo', function() {
+        return {
+            template: '<div><img src="{{ model.path }}"></img></div>',
+            replace : true,
+            transclude: true,
+            restrict: 'E',
             scope : {
                 model: '='
             }
         }
     }).
-    directive('photoDetail', function($location, Comment) {
+    directive('photoModal', function(Comment) {
         return {
             restrict: 'E',
-            scope : {
-                selectedPhoto: '='
+            scope: {
+                selectedPhoto : '=model'
             },
-            link : function(scope, element, attrs) {
-                scope.comment = new Comment;
-                element.on('hidden', function() {
-                    $location.path('/');
-                    scope.$apply();
-                });
-                scope.addComment = function() {
-                    scope.comment.$save({photoId: scope.selectedPhoto._id }, function(res) {
+            link: function(scope, el, attrs) {
+                scope.submitComment = function() {
+                    scope.comment.$save({ photoId: scope.selectedPhoto._id }, function(res){
                         scope.selectedPhoto.comments.push(res);
                         scope.comment = new Comment;
                     });
                 }
                 scope.$watch('selectedPhoto', function(e) {
                     if (!e) {
-                        element.modal('hide');
+                        el.hide();
                     } else {
-                        element.modal("show");
+                        el.show();
+                        scope.comment = new Comment;
                     }
                 });
             }
@@ -62,8 +77,8 @@ angular.module('nikoInLondon.directives', []).
     });
 
 angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
-    controller('MainController', function($scope, $window, $routeParams, photoService, Comment) {
-        photoService.getPhotos().then(function(res) {
+    controller('MainController', function($scope, $window, $routeParams, Photo, Comment) {
+        Photo.getPhotos().then(function(res) {
             $scope.photos = res;
             if ($routeParams.photoId) {
                 $scope.photos.forEach(function(el) {
@@ -83,9 +98,9 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
         }
     });
 
-angular.module('nikoInLondon', ['nikoInLondon.controllers', 'nikoInLondon.directives']).
+angular.module('nikoInLondon', ['nikoInLondon.controllers', 'nikoInLondon.directives', 'nikoInLondon.services']).
   config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/main', {reloadOnSearch: false, templateUrl: 'views/main.html', controller: 'MainController'});
-    $routeProvider.when('/pic/:photoId', {templateUrl: 'views/main.html', controller: 'MainController' });
-    $routeProvider.otherwise({redirectTo: '/main'});
+    $routeProvider.when('/', { templateUrl: 'views/main.html', controller: 'MainController'});
+    $routeProvider.when('/photos/:photoId', {templateUrl: 'views/main.html', controller: 'MainController' });
+    $routeProvider.otherwise({redirectTo: '/'});
   }]);

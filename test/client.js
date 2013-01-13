@@ -1,7 +1,10 @@
 describe('Niko In London', function() {
 
     var httpBackend;
+    beforeEach(module('nikoInLondon.directives'));
     beforeEach(module('nikoInLondon.services'));
+    beforeEach(module('nikoInLondon.controllers'));
+
     beforeEach(inject(function($httpBackend) {
         httpBackend = $httpBackend;
         httpBackend.whenGET('photos').respond([
@@ -39,12 +42,12 @@ describe('Niko In London', function() {
         }));
 
         it('should create a photos model with 2 photos', function() {
-            ctrl = controller(MainController, {$scope: scope});
+            ctrl = controller('MainController', {$scope: scope});
             httpBackend.flush()
             expect(scope.photos.length).toEqual(2);
         });
 
-        it('should be able to create comment childrnen', function() {
+        it('should be able to create comment children', function() {
             inject(function(Comment) {
                 var c = new Comment({
                     body: 'your nice!'
@@ -56,7 +59,7 @@ describe('Niko In London', function() {
         });
 
         it('should change the title', function() {
-            ctrl = controller(MainController, {$scope: scope});
+            ctrl = controller('MainController', {$scope: scope});
             expect(scope.selectedPhoto).toBeFalsy();
             inject(function($window) {
                 expect($window.document.title).toEqual('Niko In London | All Photos');
@@ -64,7 +67,7 @@ describe('Niko In London', function() {
         });
 
         it('should build the title based on the selected photo', function() {
-            ctrl = controller(MainController, {$scope: scope, $routeParams : {
+            ctrl = controller('MainController', {$scope: scope, $routeParams : {
                 photoId : "50e49454471aaa4f4a000003"
             }});
             httpBackend.flush();
@@ -77,7 +80,7 @@ describe('Niko In London', function() {
 
         it('should create a new comment on new comment submitted', function() {
             inject(function(Photo) {
-                ctrl = controller(MainController, {$scope: scope, $routeParams : {
+                ctrl = controller('MainController', {$scope: scope, $routeParams : {
                     photoId : '50e49454471aaa4f4a000003'
                 }});
                 httpBackend.flush();
@@ -90,6 +93,57 @@ describe('Niko In London', function() {
                 expect(scope.newComment.body).toNotEqual('your nice!');
             });
         });
+    });
+
+    describe('Niko In London Directives', function() {
+
+        var scope, compile;
+
+        beforeEach(inject(function($rootScope, $compile) {
+            scope = $rootScope.$new();
+            compile = $compile;
+        }));
+
+        it('should have a photo-grid element that does masonry', function() {
+            scope.nums = [1,2,3,4];
+            var el = '<photo-grid item-selector="li"> <li ng-repeat="num in nums">{{ num }}</li> </photo-grid>';
+            var res = compile(el)(scope);
+            expect(angular.element(res).css('position')).toEqual('relative');
+        });
+        it('should have a photo element represents the image given a model', function() {
+            scope.photo = {
+                title: 'Hello World',
+                path: '/images/hello-world.png'
+            };
+            var el = '<photo model="photo"></photo>';
+            var res = compile(el)(scope);
+            scope.$digest();
+            expect(angular.element(res).find('img').length).toEqual(1);
+        });
+        it('should have a photo detail element if clicked', function() {
+            var el = '<photo-modal model="selectedPhoto"></photo-modal-box>';
+            var res = compile(el)(scope);
+            scope.$digest();
+            expect(res.css('display')).toEqual('none');
+
+            scope.selectedPhoto = {
+                _id: '50e49454471aaa4f4a000003',
+                title: 'Hello World',
+                path: '/images/hello-world.png',
+                comments: []
+            };
+            scope.$digest();
+            expect(res.css('display')).toNotEqual('none');
+
+            var isolateScope = res.scope();
+            expect(isolateScope.comment).toBeTruthy();
+            isolateScope.comment.body = "Hello World";
+            isolateScope.submitComment();
+            httpBackend.flush()
+            expect(scope.selectedPhoto.comments.length).toEqual(1);
+            expect(isolateScope.comment.body).toBeFalsy();
+        });
+
     });
 
 });

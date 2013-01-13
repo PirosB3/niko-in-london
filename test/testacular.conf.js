@@ -10,6 +10,8 @@ basePath = '../';
 files = [
   JASMINE,
   JASMINE_ADAPTER,
+  'public/lib/jquery/jquery.min.js',
+  'public/lib/jquery/jquery.masonry.min.js',
   'public/lib/angular/angular.js',
   'public/lib/angular/angular-*.js',
   'test/angular-mocks.js',
