@@ -13,12 +13,12 @@ var fileNameRe = /.*\/(.+)$/;
 var FileDescriptor = function(args) {
     var absolutePath = resolve(args.path);
     var fileName = args.fileName;
+    var contentType = args.contentType;
 
     var i = fileName.lastIndexOf('.');
     if (!i) throw new Error("File cannot be found");
     var extension = fileName.substr(i+1);
     var name = fileName.substr(0, i);
-    var contentType = args.contentType;
 
     this.getPath = function() { return absolutePath; }
     this.getName = function() { return name; }
@@ -39,7 +39,7 @@ var resizePhoto = function(fileObject) {
     var oldFile = fileObject.getPath();
     var newFileName = fileObject.getName() + '-compressed.' + fileObject.getFormat();
     var newFilePath = '/tmp/' + newFileName;
-    var command = 'convert ' + oldFile + ' -resize 300 ' + newFilePath;
+    var command = 'convert ' + oldFile + ' -resize 500 ' + newFilePath;
 
     var d = Q.defer();
     exec(command, function(err, stdout, stderr) {
