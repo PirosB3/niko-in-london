@@ -25,7 +25,7 @@ angular.module('nikoInLondon.directives', []).
     directive('photoGrid', function() {
         var linkFn = function(scope, element, attrs) {
             element.masonry({
-                itemSelector: element.itemSelector,
+                itemSelector: attrs.itemSelector,
                 columnWidth: 240,
                 animationOptions: {
                   duration: 400
@@ -36,14 +36,14 @@ angular.module('nikoInLondon.directives', []).
             restrict: 'E',
             link: linkFn,
             scope : {
-                itemSelector: '='
+                itemSelector: '=',
+                photos: '='
             }
         }
     }).
     directive('photo', function() {
         return {
-            template: '<div><img src="{{ model.path }}"></img></div>',
-            replace : true,
+            templateUrl: 'views/photo-single.html',
             transclude: true,
             restrict: 'E',
             scope : {
@@ -51,13 +51,19 @@ angular.module('nikoInLondon.directives', []).
             }
         }
     }).
-    directive('photoModal', function(Comment) {
+    directive('photoModal', function(Comment, $location) {
         return {
             restrict: 'E',
+            templateUrl: 'views/photo-modal.html',
             scope: {
                 selectedPhoto : '=model'
             },
             link: function(scope, el, attrs) {
+                el.on('hidden', function() {
+                    scope.$apply(function() {
+                        $location.path('/');
+                    });
+                });
                 scope.submitComment = function() {
                     scope.comment.$save({ photoId: scope.selectedPhoto._id }, function(res){
                         scope.selectedPhoto.comments.push(res);
@@ -67,8 +73,10 @@ angular.module('nikoInLondon.directives', []).
                 scope.$watch('selectedPhoto', function(e) {
                     if (!e) {
                         el.hide();
+                        el.modal('hide');
                     } else {
                         el.show();
+                        el.modal('show');
                         scope.comment = new Comment;
                     }
                 });
@@ -84,18 +92,10 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
                 $scope.photos.forEach(function(el) {
                     if (el._id === $routeParams.photoId) $scope.selectedPhoto = el;
                 });
-                $scope.newComment = new Comment();
                 $window.document.title = "Niko In London | " + $scope.selectedPhoto.title;
             }
         });
         $window.document.title = "Niko In London | All Photos";
-
-        $scope.submitNewComment = function() {
-            $scope.newComment.$save({ photoId : $scope.selectedPhoto._id }, function() {
-                $scope.selectedPhoto.comments.push($scope.newComment);
-                $scope.newComment = new Comment();
-            });
-        }
     });
 
 angular.module('nikoInLondon', ['nikoInLondon.controllers', 'nikoInLondon.directives', 'nikoInLondon.services']).

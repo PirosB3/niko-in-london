@@ -1,6 +1,7 @@
 doctype 5
 html(lang="en")
 script(src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js")
+script(src="/lib/jquery/jquery.masonry.min.js")
 script(src="http://twitter.github.com/bootstrap/assets/js/bootstrap-modal.js")
 script(src="/lib/angular/angular.js")
 script(src="/lib/angular/angular-resource.js")
@@ -16,4 +17,27 @@ body(ng-app="nikoInLondon")
         .navbar-inner
             .container
                 a.brand(href="/#/") Niko In London
-    #container(ng-view)
+    #container(ng-view, style="margin-top: 70px; overflow: hidden;")
+
+script(type="text/ng-template", id="views/main.html")
+    photo-modal(model="selectedPhoto")
+    photo-grid(item-selector="photo", photos="photos")
+        photo(ng-repeat="photo in photos", model="photo")
+
+script(type="text/ng-template", id="views/photo-single.html")
+    .thumbnail(class="span4", style="float: left;")
+        a(href="#/photos/{{ model._id }}")
+            img(ng-src="{{ model.path }}", rel="{{ model.title }}")
+        .caption
+            a(href="#/photos/{{ model._id }}")
+                h3 {{ model.title }}
+        
+script(type="text/ng-template", id="views/photo-modal.html")
+    .thumbnail(class="modal")
+        img(ng-src="{{ selectedPhoto.path }}", alt="{{ selectedPhoto.title }}")
+        .caption
+            h3 {{ selectedPhoto.title }}
+            ul.comments
+                li(ng-repeat="comment in model.comments")
+                    h3 Daniel Pyrathon
+                    blockquote {{ comment.body }} 

@@ -121,7 +121,7 @@ describe('Niko In London', function() {
             expect(angular.element(res).find('img').length).toEqual(1);
         });
         it('should have a photo detail element if clicked', function() {
-            var el = '<photo-modal model="selectedPhoto"></photo-modal-box>';
+            var el = '<photo-modal model="selectedPhoto"></photo-modal>';
             var res = compile(el)(scope);
             scope.$digest();
             expect(res.css('display')).toEqual('none');
