@@ -61,9 +61,7 @@ var storeImageInS3 = function(imageUploadDir, client, fileObject, imageBuffer) {
       'Content-Type': fileObject.getContentType()
     };
 
-    debugger;
     client.putBuffer(imageBuffer, filePath, headers, function(err, res) {
-        console.log(res.statusCode);
         !err && (res.statusCode === 200) ? d.resolve(filePath) : d.reject(err);
     });
     return d.promise;
