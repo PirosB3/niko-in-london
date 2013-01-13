@@ -26,7 +26,11 @@ buster.testCase('utils', {
         assert(/^http/.test(url));
     },
     'it should return true' : function(done) {
-        var fileObject = new utils.FileDescriptor('nodejs-logo.png');
+        var fileObject = new utils.FileDescriptor({
+            path: '/tmp/image',
+            fileName: 'nodejs-logo.png',
+            contentType: 'image/png'
+        });
         var path = utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, fileObject, logo);
         path.then(function(imageName) {
             assert.same(imageName, '/images/nodejs-logo.png');
@@ -36,14 +40,23 @@ buster.testCase('utils', {
         });
     },
     'File object should contain all information regarding file from path' : function() {
-        var f = new utils.FileDescriptor('./logo.PNG');
-        assert(/test\/logo.PNG$/.test(f.getPath()));
-        assert.same(f.getName(), 'logo');
-        assert.same(f.getFormat(), 'PNG');
+        var f = new utils.FileDescriptor({
+            path: '/tmp/8ef9c52abe857867fd0a4e9a819d1876',
+            fileName: 'edge.png',
+            contentType: 'image/png'
+        });
+        assert.same(f.getPath(), '/tmp/8ef9c52abe857867fd0a4e9a819d1876');
+        assert.same(f.getName(), 'edge');
+        assert.same(f.getFormat(), 'png');
+        assert.same(f.getFileName(), 'edge.png');
         assert.same(f.getContentType(), 'image/png');
     },
     "it should be able to resize photos" : function(done) {
-        var f = new utils.FileDescriptor('./logo.png');
+        var f = new utils.FileDescriptor({
+            path: './logo.png',
+            fileName: 'logo.png',
+            contentType: 'image/png'
+        });
         utils.resizePhoto(f).then(function(f2) {
             assert.same(f2.getName(), 'logo-compressed');
             done();

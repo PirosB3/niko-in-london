@@ -44,18 +44,28 @@ app.post('/photos/create', function(req, res) {
     if (!(req.files.image && req.body.title)) {
         return res.json({ error: 'You must specify an image and a title' });
     }
-    fs.readFile(req.files.image.path, function(err, data) {
-        if (err) return res.json({ error: 'There was an error loading your file' });
-        Q.when(utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, req.files.image.name, data))
-            .then(function(imagePath) {
-                Q.when(persistence.addPhoto({ title: req.body.title, path: imagePath}))
-                    .then(_.bind(res.json, res), function(err) {
-                        res.json(500, { error: 'There was an issue saving your photo' });
-                    });
-            }, function(err) {
-                res.json(500, { error: 'There was an issue uploading your photo' });
-            });
+
+    var fileObject = new utils.FileDescriptor({
+        path: req.files.image.path,
+        fileName: req.files.image.name,
+        contentType: req.files.image.type
+    });
+    Q.when(utils.resizePhoto(fileObject)).then(function(fileObject) {
+        fs.readFile(fileObject.getPath(), function(err, data) {
+            if (err) return res.json({ error: 'There was an error loading your file' });
+                Q.when(utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, fileObject, data))
+                .then(function(imagePath) {
+                    Q.when(persistence.addPhoto({ title: req.body.title, path: imagePath}))
+                        .then(_.bind(res.json, res), function(err) {
+                            res.json(500, { error: 'There was an issue saving your photo' });
+                        });
+                }, function(err) {
+                    res.json(500, { error: err });
+                });
         });
+    }, function(err) {
+        res.json(500, { error: "There was an issue resizing your photo" });
+    });
 });
 
 app.post('/photos/:id/comments/create', function(req, res) {
