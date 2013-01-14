@@ -33,11 +33,13 @@ script(type="text/ng-template", id="views/photo-single.html")
                 h3 {{ model.title }}
         
 script(type="text/ng-template", id="views/photo-modal.html")
-    .thumbnail(class="modal")
+    .thumbnail(class="modal", style="overflow-y: auto; max-height: 90%; margin-top: -40px;")
         img(ng-src="{{ selectedPhoto.path }}", alt="{{ selectedPhoto.title }}")
         .caption
             h3 {{ selectedPhoto.title }}
             ul.comments
-                li(ng-repeat="comment in model.comments")
+                li(ng-repeat="comment in selectedPhoto.comments")
                     h3 Daniel Pyrathon
                     blockquote {{ comment.body }} 
+            form(ng-submit="submitComment()")
+                input(type="text", ng-model="comment.body", style="width: 525px")
