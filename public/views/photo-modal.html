@@ -1,0 +1,16 @@
+<div style="overflow-y: auto; max-height: 90%; margin-top: -40px;" class="thumbnail modal">
+  <img ng-src="{{ selectedPhoto.path }}" alt="{{ selectedPhoto.title }}"
+  />
+  <div class="caption">
+    <h3>{{ selectedPhoto.title }}</h3>
+    <ul class="comments">
+      <li ng-repeat="comment in selectedPhoto.comments">
+        <h3>Daniel Pyrathon</h3>
+        <blockquote>{{ comment.body }}</blockquote>
+      </li>
+    </ul>
+    <form ng-submit="submitComment()">
+      <input type="text" ng-model="comment.body" style="width: 525px" />
+    </form>
+  </div>
+</div>
