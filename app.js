@@ -42,7 +42,7 @@ app.get('/photos', function(req, res) {
     );
 });
 
-app.post('/photos/create', function(req, res) {
+app.post('/photos', function(req, res) {
     if (!(req.files.image && req.body.title)) {
         return res.json({ error: 'You must specify an image and a title' });
     }

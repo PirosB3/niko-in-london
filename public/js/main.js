@@ -21,7 +21,7 @@ angular.module('nikoInLondon.services', ['ngResource']).
         return $resource('photos/:photoId/comments', { photoId: 'photoId'});
     });
 
-angular.module('nikoInLondon.directives', []).
+angular.module('nikoInLondon.directives', ['nikoInLondon.services']).
     directive('photoGrid', function() {
         var linkFn = function(scope, element, attrs) {
             element.masonry({
@@ -43,7 +43,7 @@ angular.module('nikoInLondon.directives', []).
     }).
     directive('photo', function() {
         return {
-            templateUrl: 'views/photo-single.html',
+            templateUrl: 'public/views/photo-single.html',
             transclude: true,
             restrict: 'E',
             scope : {
@@ -54,32 +54,24 @@ angular.module('nikoInLondon.directives', []).
     directive('photoModal', function(Comment, $location) {
         return {
             restrict: 'E',
-            templateUrl: 'views/photo-modal.html',
+            templateUrl: 'public/views/photo-modal.html',
             scope: {
-                selectedPhoto : '=model'
+                photo : '='
             },
             link: function(scope, el, attrs) {
-                el.on('hidden', function() {
-                    scope.$apply(function() {
-                        $location.path('/');
-                    });
-                });
-                scope.submitComment = function() {
-                    scope.comment.$save({ photoId: scope.selectedPhoto._id }, function(res){
-                        scope.selectedPhoto.comments.push(res);
-                        scope.comment = new Comment;
-                    });
-                }
-                scope.$watch('selectedPhoto', function(e) {
-                    if (!e) {
+                scope.newComment = new Comment;
+                scope.$watch('photo', function(photo) {
+                    if (!photo) {
                         el.hide();
-                        el.modal('hide');
                     } else {
                         el.show();
-                        el.modal('show');
-                        scope.comment = new Comment;
                     }
                 });
+                scope.submitComment = function() {
+                    scope.newComment.$save({ photoId: scope.photo._id }, function(res) {
+                        scope.photo.comments.push(res);
+                    });
+                };
             }
         }
     });
