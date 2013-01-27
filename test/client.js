@@ -88,13 +88,26 @@ describe('Directives', function() {
                 comments: comments
             };
             scope.$digest();
-            var s = el.scope();
             el.find('input[type="text"]').val("Lorem Ipsum!");
             el.find('form').submit();
             httpBackend.flush()
             expect(el.find('.comments li').length).toEqual(3);
         });
+    })
+});
 
+describe('Services', function() {
+    var utils;
+
+    beforeEach(module('nikoInLondon.directives'))
+    beforeEach(inject(function(DOMUtils) {
+        utils = DOMUtils;
+    }));
+
+    it("Should clear overlay box", function() {
+        var el = $('<div><div class="modal-backdrop"></div></div>');
+        utils.flushModalBackdropFlusher(el);
+        expect(el.find('.modal-backdrop').length).toEqual(0);
     });
 
 });

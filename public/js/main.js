@@ -1,4 +1,11 @@
 angular.module('nikoInLondon.services', ['ngResource']).
+    factory('DOMUtils', function($resource) {
+        return {
+            flushModalBackdropFlusher : function(el) {
+                return el.find('.modal-backdrop').remove();
+            }
+        };
+    }).
     factory('Photo', function($resource, $q) {
         var Photo = $resource('photos/:photoId', { photoId: '@_id'});
         var cache;
@@ -51,7 +58,7 @@ angular.module('nikoInLondon.directives', ['nikoInLondon.services']).
             }
         }
     }).
-    directive('photoModal', function(Comment, $location) {
+    directive('photoModal', function(Comment, $location, DOMUtils) {
         return {
             restrict: 'E',
             templateUrl: 'public/views/photo-modal.html',
@@ -59,32 +66,47 @@ angular.module('nikoInLondon.directives', ['nikoInLondon.services']).
                 photo : '='
             },
             link: function(scope, el, attrs) {
+                DOMUtils.flushModalBackdropFlusher($(document.body));
+
                 scope.newComment = new Comment;
-                scope.$watch('photo', function(photo) {
-                    if (!photo) {
-                        el.hide();
-                    } else {
-                        el.show();
-                    }
-                });
                 scope.submitComment = function() {
                     scope.newComment.$save({ photoId: scope.photo._id }, function(res) {
                         scope.photo.comments.push(res);
+                        scope.newComment = new Comment;
                     });
                 };
+
+                el.on('hidden', function() {
+                    scope.$apply(function() {
+                        $location.path('/');
+                    });
+                });
+                scope.$watch('photo', function(photo) {
+                    if (!photo) {
+                        el.hide();
+                        el.modal('hide');
+                    } else {
+                        el.show();
+                        el.modal('show');
+                    }
+                });
             }
         }
     });
 
 angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
-    controller('MainController', function($scope, $window, $routeParams, Photo, Comment) {
+    controller('MainController', function($scope, $window, $routeParams, Photo, Comment, $location) {
         Photo.getPhotos().then(function(res) {
             $scope.photos = res;
             if ($routeParams.photoId) {
                 $scope.photos.forEach(function(el) {
                     if (el._id === $routeParams.photoId) $scope.selectedPhoto = el;
                 });
-                $window.document.title = "Niko In London | " + $scope.selectedPhoto.title;
+                if (!$scope.selectedPhoto) {
+                    $location.path('/');    
+                } else {
+                    $window.document.title = "Niko In London | " + $scope.selectedPhoto.title;
+                }
             }
         });
         $window.document.title = "Niko In London | All Photos";
@@ -92,7 +114,7 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
 
 angular.module('nikoInLondon', ['nikoInLondon.controllers', 'nikoInLondon.directives', 'nikoInLondon.services']).
   config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/', { templateUrl: 'views/main.html', controller: 'MainController'});
-    $routeProvider.when('/photos/:photoId', {templateUrl: 'views/main.html', controller: 'MainController' });
+    $routeProvider.when('/', { templateUrl: 'public/views/main.html', controller: 'MainController'});
+    $routeProvider.when('/photos/:photoId', {templateUrl: 'public/views/main.html', controller: 'MainController' });
     $routeProvider.otherwise({redirectTo: '/'});
   }]);
