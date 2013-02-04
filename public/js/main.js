@@ -28,7 +28,7 @@ angular.module('nikoInLondon.services', ['ngResource']).
         return $resource('photos/:photoId/comments', { photoId: 'photoId'});
     });
 
-angular.module('nikoInLondon.directives', ['nikoInLondon.services']).
+angular.module('nikoInLondon.directives', ['nikoInLondon.services', 'nikoInLondon.controllers']).
     directive('photoGrid', function() {
         var linkFn = function(scope, element, attrs) {
             element.masonry({
@@ -46,6 +46,14 @@ angular.module('nikoInLondon.directives', ['nikoInLondon.services']).
                 itemSelector: '=',
                 photos: '='
             }
+        }
+    }).
+    directive('photoUploader', function() {
+        return {
+            restrict: 'E',
+            templateUrl: 'public/views/photo-new.html',
+            controller: 'PhotoUploaderController',
+            scope: true
         }
     }).
     directive('photo', function() {
@@ -110,6 +118,38 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
             }
         });
         $window.document.title = "Niko In London | All Photos";
+    }).
+    controller('PhotoUploaderController', function($scope, $q) {
+        $scope.status = 'idle';
+
+        this.checkValid = function(e) {
+            return e.dataTransfer && e.dataTransfer.files.length > 0;
+        };
+
+        this.readData = function(file) {
+            var def = $q.defer();
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                def.resolve({
+                    name: file.name,
+                    type: file.type,
+                    data: event.target.result
+                });
+            };
+            reader.readAsDataURL(file);
+            return def.promise;
+        };
+
+        this.onDropHandler = function(e) {
+            if (!this.checkValid(e)) return;
+            $scope.status = 'loading';
+            $q.when(this.readData(e.dataTransfer.files[0])).then(function(res) {
+                $scope.photo = angular.extend({
+                    title: res.file.substring(0, res.file.lastIndexOf('.'))
+                }, res);
+                $scope.status = 'loaded';
+            });
+        }
     });
 
 angular.module('nikoInLondon', ['nikoInLondon.controllers', 'nikoInLondon.directives', 'nikoInLondon.services']).

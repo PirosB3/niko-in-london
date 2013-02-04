@@ -2,7 +2,7 @@ describe('Directives', function() {
     var el, scope;
 
     beforeEach(module('nikoInLondon.directives'));
-    beforeEach(module('public/views/photo-modal.html', 'public/views/photo-single.html'));
+    beforeEach(module('public/views/photo-modal.html', 'public/views/photo-new.html', 'public/views/photo-single.html'));
 
     describe('Photo', function() {
         beforeEach(inject(function($rootScope, $compile) {
@@ -32,6 +32,20 @@ describe('Directives', function() {
 
         it("should have called masonry", function() {
             expect(el.css('position')).toEqual('relative');
+        });
+    });
+
+    describe('PhotoUploader', function() {
+        beforeEach(inject(function($rootScope, $compile) {
+            scope = $rootScope;
+            el = angular.element('<photo-uploader></photo-uploader>');
+            $compile(el)(scope);
+            scope.$digest();
+        }));
+
+        it("should have a img tag and a uploader box", function() {
+            expect(el.find('img').length).toEqual(1);
+            expect(el.find('.uploader').length).toEqual(1);
         });
     });
 
@@ -108,6 +122,60 @@ describe('Services', function() {
         var el = $('<div><div class="modal-backdrop"></div></div>');
         utils.flushModalBackdropFlusher(el);
         expect(el.find('.modal-backdrop').length).toEqual(0);
+    });
+
+});
+
+describe('Controllers', function() {
+
+    var controller, scope, q;
+
+    var e = {
+        dataTransfer: {
+            files: [
+                true
+            ]
+        }
+    };
+
+    beforeEach(module('nikoInLondon.controllers'))
+    beforeEach(inject(function($controller, $rootScope, $q) {
+        scope = $rootScope.$new()
+        controller = $controller;
+        q = $q;
+    }));
+
+    it('should be able to change status from idle to loading', function() {
+        var ctrl = controller('PhotoUploaderController', {$scope: scope});
+        expect(scope.status).toEqual('idle');
+        ctrl.onDropHandler(e);
+        expect(scope.status).toEqual('loading');
+    });
+
+    it('should go back to idle on error', function() {
+        var ctrl = controller('PhotoUploaderController', {$scope: scope});
+        ctrl.onDropHandler({});
+        expect(scope.status).toEqual('idle');
+    });
+
+    it('should return a correct object', function(done) {
+        var ctrl = controller('PhotoUploaderController', {$scope: scope});
+        spyOn(ctrl, 'checkValid').andReturn(true);
+
+        var d = q.defer();
+        d.resolve({
+            file: 'hello_world.jpeg',
+            data: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQA',
+            type: 'image/jpeg'
+        });
+        spyOn(ctrl, 'readData').andReturn(d.promise);
+
+        ctrl.onDropHandler(e);
+        scope.$apply();
+        expect(scope.status).toEqual('loaded');
+        expect(scope.photo.type == 'image/jpeg');
+        expect(scope.photo.title == 'hello_world');
+        expect(scope.photo.data == 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQA');
     });
 
 });
