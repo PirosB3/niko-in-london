@@ -21,6 +21,9 @@ angular.module('nikoInLondon.services', ['ngResource']).
                     });
                 }
                 return def.promise;
+            },
+            createNewPhoto : function(data) {
+                return new Photo(angular.extend({}, data));
             }
         }
     }).
@@ -119,7 +122,7 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
         });
         $window.document.title = "Niko In London | All Photos";
     }).
-    controller('PhotoUploaderController', function($scope, $q) {
+    controller('PhotoUploaderController', function($scope, $q, $element, Photo) {
         $scope.status = 'idle';
 
         this.checkValid = function(e) {
@@ -127,27 +130,50 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
         };
 
         this.readData = function(file) {
-            var def = $q.defer();
+            var deferred = $q.defer();
             var reader = new FileReader();
             reader.onload = function (event) {
-                def.resolve({
-                    name: file.name,
-                    type: file.type,
-                    data: event.target.result
+                $scope.$apply(function() {
+                    deferred.resolve({
+                        name: file.name,
+                        type: file.type,
+                        data: event.target.result
+                    });
                 });
             };
             reader.readAsDataURL(file);
-            return def.promise;
+            return deferred.promise;
         };
 
         this.onDropHandler = function(e) {
             if (!this.checkValid(e)) return;
             $scope.status = 'loading';
-            $q.when(this.readData(e.dataTransfer.files[0])).then(function(res) {
-                $scope.photo = angular.extend({
-                    title: res.file.substring(0, res.file.lastIndexOf('.'))
-                }, res);
+            this.readData(e.dataTransfer.files[0]).then(function(res) {
+                $scope.photo = Photo.createNewPhoto(angular.extend({
+                    title: res.name.substring(0, res.name.lastIndexOf('.'))
+                }, res));
                 $scope.status = 'loaded';
+            });
+        }
+
+        var falsy = function() { return false; };
+        var drop = $element.find('.drop')[0];
+
+        var _this = this;
+        drop.ondragover =  falsy;
+        drop.ondragend = falsy;
+        drop.ondrop = function(e) {
+            e.preventDefault();
+            _this.onDropHandler(e);
+        }
+
+        $scope.submitPhoto = function() {
+            $scope.photo.$save(function(res) {
+                Photo.getPhotos().then(function(photos) {
+                    photos.push(res);    
+                    $scope.photo = undefined;
+                    $scope.$digest();
+                });
             });
         }
     });

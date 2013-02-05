@@ -43,31 +43,38 @@ app.get('/photos', function(req, res) {
 });
 
 app.post('/photos', function(req, res) {
-    if (!(req.files.image && req.body.title)) {
+    
+    if (!(req.body.data && req.body.title)) {
         return res.json({ error: 'You must specify an image and a title' });
     }
 
-    var fileObject = new utils.FileDescriptor({
-        path: req.files.image.path,
-        fileName: req.files.image.name,
-        contentType: req.files.image.type
-    });
-    Q.when(utils.resizePhoto(fileObject)).then(function(fileObject) {
-        fs.readFile(fileObject.getPath(), function(err, data) {
-            if (err) return res.json({ error: 'There was an error loading your file' });
-                Q.when(utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, fileObject, data))
-                .then(function(imagePath) {
-                    Q.when(persistence.addPhoto({ title: req.body.title, path: imagePath}))
-                        .then(_.bind(res.json, res), function(err) {
-                            res.json(500, { error: 'There was an issue saving your photo' });
-                        });
-                }, function(err) {
-                    res.json(500, { error: err });
-                });
+    utils.saveBase64Image(req.body.data).then(function(imgPath) {
+        var fileObject = new utils.FileDescriptor({
+            path: imgPath,
+            fileName: req.body.name,
+            contentType: req.body.type
+        });
+        Q.when(utils.resizePhoto(fileObject)).then(function(fileObject) {
+            console.log(fileObject.getPath());
+            fs.readFile(fileObject.getPath(), function(err, data) {
+                if (err) return res.json({ error: 'There was an error loading your file' });
+                    Q.when(utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, fileObject, data))
+                    .then(function(imagePath) {
+                        Q.when(persistence.addPhoto({ title: req.body.title, path: imagePath}))
+                            .then(_.bind(res.json, res), function(err) {
+                                res.json(500, { error: 'There was an issue saving your photo' });
+                            });
+                    }, function(err) {
+                        res.json(500, { error: err });
+                    });
+            });
+        }, function(err) {
+            res.json(500, { error: "There was an issue resizing your photo" });
         });
     }, function(err) {
-        res.json(500, { error: "There was an issue resizing your photo" });
+        return res.json(500, { error: 'There was an issue decoding your photo' });
     });
+
 });
 
 app.post('/photos/:id/comments', function(req, res) {

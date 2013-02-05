@@ -42,11 +42,6 @@ describe('Directives', function() {
             $compile(el)(scope);
             scope.$digest();
         }));
-
-        it("should have a img tag and a uploader box", function() {
-            expect(el.find('img').length).toEqual(1);
-            expect(el.find('.uploader').length).toEqual(1);
-        });
     });
 
     describe('PhotoModal', function() {

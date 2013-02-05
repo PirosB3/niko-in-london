@@ -30,7 +30,8 @@ var FileDescriptor = function(args) {
 
 var saveBase64Image = function(img) {
     var d = Q.defer();
-    var base64Data = img.replace(/^data:image\/png;base64,/,"");
+    var base64Data = img.replace(/^data:image\/\w+;base64,/,"");
+    console.log(base64Data);
     var binaryData = new Buffer(base64Data, 'base64').toString('binary');
 
     var newPath = '/tmp/' + Math.random().toString(36).substring(7);
