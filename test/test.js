@@ -3,6 +3,7 @@ var knox = require('knox');
 var fs = require('fs');
 var MongoClient = require('mongodb').MongoClient;
 
+var path = require('path');
 var utils = require('../libs/utils.js');
 var persistence = require('../libs/persistence.js');
 var settings = require('../settings.js').settings;
@@ -18,6 +19,13 @@ var logo = fs.readFileSync('./logo.png')
 buster.testCase('utils', {
     setUp : function() {
         this.timeout = 1000;
+    },
+    'it should be able to save base64 encoded images' : function(done) {
+        var image = 'data:image/jpeg;base64,/9j/4RSBRXhpZgAASUkqAA';
+        var img = utils.saveBase64Image(image).then(function(imgPath) {
+            assert(path.existsSync(imgPath));
+            done();
+        });
     },
     'it should return a string' : function() {
         var pathDecorator = utils.createSignedS3Decorator(client);

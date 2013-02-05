@@ -1,3 +1,4 @@
+var fs = require('fs');
 var exec = require('child_process').exec;
 var resolve = require('path').resolve;
 var Q = require('q');
@@ -25,6 +26,18 @@ var FileDescriptor = function(args) {
     this.getFormat = function() { return extension; }
     this.getFileName = function() { return fileName; }
     this.getContentType = function() { return contentType; }
+}
+
+var saveBase64Image = function(img) {
+    var d = Q.defer();
+    var base64Data = img.replace(/^data:image\/png;base64,/,"");
+    var binaryData = new Buffer(base64Data, 'base64').toString('binary');
+
+    var newPath = '/tmp/' + Math.random().toString(36).substring(7);
+    fs.writeFile(newPath, binaryData, "binary", function(err) {
+        return err ? d.reject(err) : d.resolve(newPath);
+    });
+    return d.promise;
 }
 
 var createSignedS3Decorator = function(client) {
@@ -71,3 +84,4 @@ exports.createSignedS3Decorator = createSignedS3Decorator;
 exports.storeImageInS3 = storeImageInS3;
 exports.FileDescriptor = FileDescriptor;
 exports.resizePhoto = resizePhoto;
+exports.saveBase64Image = saveBase64Image;
