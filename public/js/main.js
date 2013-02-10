@@ -42,7 +42,7 @@ angular.module('nikoInLondon.filters', []).
         }
     });
 
-angular.module('nikoInLondon.directives', ['nikoInLondon.services', 'nikoInLondon.controllers']).
+angular.module('nikoInLondon.directives', ['nikoInLondon.services', 'nikoInLondon.controllers', 'nikoInLondon.filters']).
     directive('photoGrid', function() {
         var linkFn = function(scope, element, attrs) {
             element.masonry({
