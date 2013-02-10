@@ -4,7 +4,7 @@
     </a>
     <div class="caption">
         <a href="#/photos/{{ model._id }}">
-            <h3>{{ model.title }}</h3>
+            <h3>{{ model.title | truncate }}</h3>
         </a>
     </div>
 </div>

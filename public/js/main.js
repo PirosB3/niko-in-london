@@ -31,6 +31,17 @@ angular.module('nikoInLondon.services', ['ngResource']).
         return $resource('photos/:photoId/comments', { photoId: 'photoId'});
     });
 
+angular.module('nikoInLondon.filters', []).
+    filter('truncate', function() {
+        var TRUNCATION_LENGTH = 22;
+        return function(text) {
+            if (text.length >= TRUNCATION_LENGTH) {
+                text = text.substring(0, TRUNCATION_LENGTH-3) + '...';
+            }
+            return text;
+        }
+    });
+
 angular.module('nikoInLondon.directives', ['nikoInLondon.services', 'nikoInLondon.controllers']).
     directive('photoGrid', function() {
         var linkFn = function(scope, element, attrs) {
@@ -183,7 +194,7 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
         }
     });
 
-angular.module('nikoInLondon', ['nikoInLondon.controllers', 'nikoInLondon.directives', 'nikoInLondon.services']).
+angular.module('nikoInLondon', ['nikoInLondon.controllers', 'nikoInLondon.directives', 'nikoInLondon.services', 'nikoInLondon.filters']).
   config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/', { templateUrl: 'public/views/main.html', controller: 'MainController'});
     $routeProvider.when('/photos/:photoId', {templateUrl: 'public/views/main.html', controller: 'MainController' });

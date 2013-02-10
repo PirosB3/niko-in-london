@@ -120,6 +120,30 @@ describe('Services', function() {
 
 });
 
+describe('Filters', function() {
+    var compile, scope;
+
+    beforeEach(module('nikoInLondon.filters'));
+    beforeEach(inject(function($compile, $rootScope) {
+        compile = $compile;
+        scope = $rootScope;
+    }));
+
+    it("Should be able to truncate", function() {
+        var el = angular.element('<p>{{ value|truncate }}</p>');
+
+        scope.value = "Hello";
+        compile(el)(scope)
+        scope.$digest();
+        expect(el.text()).toEqual('Hello');
+
+        scope.value = "helloworld123";
+        compile(el)(scope)
+        scope.$digest();
+        expect(el.text()).toEqual('hellowo...');
+    });
+});
+
 describe('Controllers', function() {
 
     var controller, scope, q;
