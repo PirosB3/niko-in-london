@@ -4,6 +4,10 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "express": "3.x"
+    "express": "3.x",
+    "knox": "0.4.6",
+    "underscore": "1.4.3",
+    "q": "0.8.11",
+    "mongodb": "1.2.7"
   }
 }
