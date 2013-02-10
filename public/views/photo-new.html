@@ -1,7 +1,7 @@
 <div style="height: 355px; float: left; margin-bottom: 20px;" class="thumbnail span4">
     <div style="height: 275.5px; position: relative;">
         <div style="z-index=10000; height:100%; border: 2px dotted red; border-radius: 10px;" class="drop"></div>
-        <img style="top: 0px; z-index=-10000; position: absolute; height: 277.5px; width: 370px;" ng-show="photo" src="{{ photo.data }}" rel="{{ photo.title }}"/>
+        <img style="top: 0px; z-index=-10000; position: absolute; height: 277.5px; width: 370px;" ng-show="photo" ng-src="{{ photo.data }}" rel="{{ photo.title }}"/>
     </div>
     <div ng-show="photo" class="caption">
         <form ng-submit="submitPhoto()">

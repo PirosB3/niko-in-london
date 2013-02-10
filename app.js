@@ -55,7 +55,6 @@ app.post('/photos', function(req, res) {
             contentType: req.body.type
         });
         Q.when(utils.resizePhoto(fileObject)).then(function(fileObject) {
-            console.log(fileObject.getPath());
             fs.readFile(fileObject.getPath(), function(err, data) {
                 if (err) return res.json({ error: 'There was an error loading your file' });
                     Q.when(utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, fileObject, data))
