@@ -56,7 +56,17 @@ angular.module('nikoInLondon.directives', ['nikoInLondon.services', 'nikoInLondo
             restrict: 'E',
             templateUrl: 'public/views/photo-new.html',
             controller: 'PhotoUploaderController',
-            scope: true
+            scope: true,
+            link: function(scope, el, attrs) {
+                var drop = el.find('.drop')[0];
+                var falsy = function() { return false; };
+                drop.ondragover = falsy;
+                drop.ondragend = falsy;
+                drop.ondrop = function(e) {
+                    e.preventDefault();
+                    scope.onDropHandler(e);
+                }
+            }
         }
     }).
     directive('photo', function() {
@@ -122,14 +132,14 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
         });
         $window.document.title = "Niko In London | All Photos";
     }).
-    controller('PhotoUploaderController', function($scope, $q, $element, Photo) {
+    controller('PhotoUploaderController', function($scope, $q, Photo) {
         $scope.status = 'idle';
 
-        this.checkValid = function(e) {
+        $scope.checkValid = function(e) {
             return e.dataTransfer && e.dataTransfer.files.length > 0;
         };
 
-        this.readData = function(file) {
+        $scope.readData = function(file) {
             var deferred = $q.defer();
             var reader = new FileReader();
             reader.onload = function (event) {
@@ -145,26 +155,19 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
             return deferred.promise;
         };
 
-        this.onDropHandler = function(e) {
+        $scope.initializePhoto = function(photoData) {
+            return Photo.createNewPhoto(angular.extend({
+                title: photoData.name.substring(0, photoData.name.lastIndexOf('.'))
+            }, photoData))
+        };
+
+        $scope.onDropHandler = function(e) {
             if (!this.checkValid(e)) return;
             $scope.status = 'loading';
-            this.readData(e.dataTransfer.files[0]).then(function(res) {
-                $scope.photo = Photo.createNewPhoto(angular.extend({
-                    title: res.name.substring(0, res.name.lastIndexOf('.'))
-                }, res));
+            $scope.readData(e.dataTransfer.files[0]).then(function(res) {
+                $scope.photo = $scope.initializePhoto(res);
                 $scope.status = 'loaded';
             });
-        }
-
-        var falsy = function() { return false; };
-        var drop = $element.find('.drop')[0];
-
-        var _this = this;
-        drop.ondragover =  falsy;
-        drop.ondragend = falsy;
-        drop.ondrop = function(e) {
-            e.preventDefault();
-            _this.onDropHandler(e);
         }
 
         $scope.submitPhoto = function() {

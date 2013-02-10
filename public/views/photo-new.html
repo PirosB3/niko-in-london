@@ -1,5 +1,7 @@
 <div style="height: 355px; float: left; margin-bottom: 20px;" class="thumbnail span4">
     <div style="height: 275.5px; position: relative;">
+        <p ng-show="status == 'loading'">Loading Image</p>
+        <p ng-show="status == 'idle'">Please drag an image</p>
         <div style="z-index=10000; height:100%; border: 2px dotted red; border-radius: 10px;" class="drop"></div>
         <img style="top: 0px; z-index=-10000; position: absolute; height: 277.5px; width: 370px;" ng-show="photo" ng-src="{{ photo.data }}" rel="{{ photo.title }}"/>
     </div>

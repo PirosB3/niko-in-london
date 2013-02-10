@@ -1,11 +1,9 @@
 <div style="overflow-y: auto; max-height: 90%; margin-top: -40px;" class="thumbnail modal">
-  <img ng-src="{{ photo.path }}" alt="{{ photo.title }}"
-  />
+  <img ng-src="{{ photo.path }}" alt="{{ photo.title }}" />
   <div class="caption">
     <h3>{{ photo.title }}</h3>
     <ul class="comments">
       <li ng-repeat="comment in photo.comments">
-        <h3>Daniel Pyrathon</h3>
         <blockquote>{{ comment.body }}</blockquote>
       </li>
     </ul>

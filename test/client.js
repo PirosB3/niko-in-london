@@ -27,7 +27,6 @@ describe('Directives', function() {
             scope = $rootScope;
             el = angular.element('<photo-grid></photo-grid>');
             $compile(el)(scope);
-            scope.$digest();
         }));
 
         it("should have called masonry", function() {
@@ -143,34 +142,26 @@ describe('Controllers', function() {
     it('should be able to change status from idle to loading', function() {
         var ctrl = controller('PhotoUploaderController', {$scope: scope});
         expect(scope.status).toEqual('idle');
-        ctrl.onDropHandler(e);
+        scope.onDropHandler(e);
         expect(scope.status).toEqual('loading');
     });
 
     it('should go back to idle on error', function() {
         var ctrl = controller('PhotoUploaderController', {$scope: scope});
-        ctrl.onDropHandler({});
+        scope.onDropHandler({});
         expect(scope.status).toEqual('idle');
     });
 
     it('should return a correct object', function(done) {
         var ctrl = controller('PhotoUploaderController', {$scope: scope});
-        spyOn(ctrl, 'checkValid').andReturn(true);
-
-        var d = q.defer();
-        d.resolve({
-            file: 'hello_world.jpeg',
+        var photo = scope.initializePhoto({
+            name: 'hello_world.jpeg',
             data: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQA',
             type: 'image/jpeg'
         });
-        spyOn(ctrl, 'readData').andReturn(d.promise);
-
-        ctrl.onDropHandler(e);
-        scope.$apply();
-        expect(scope.status).toEqual('loaded');
-        expect(scope.photo.type == 'image/jpeg');
-        expect(scope.photo.title == 'hello_world');
-        expect(scope.photo.data == 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQA');
+        expect(photo.type == 'image/jpeg');
+        expect(photo.title == 'hello_world');
+        expect(photo.data == 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQA');
     });
 
 });

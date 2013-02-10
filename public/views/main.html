@@ -2,5 +2,5 @@
 
 <photo-grid item-selector="photo" photos="photos">
     <photo-uploader></photo-uploader>
-    <photo ng-repeat="photo in photos" model="photo"></photo>
+    <photo ng-repeat="photo in photos | orderBy: '-date_added'" model="photo"></photo>
 </photo-grid>
