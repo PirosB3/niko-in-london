@@ -163,10 +163,12 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
 
         $scope.onDropHandler = function(e) {
             if (!this.checkValid(e)) return;
-            $scope.status = 'loading';
-            $scope.readData(e.dataTransfer.files[0]).then(function(res) {
-                $scope.photo = $scope.initializePhoto(res);
-                $scope.status = 'loaded';
+            $scope.$apply(function() {
+                $scope.status = 'loading';
+                $scope.readData(e.dataTransfer.files[0]).then(function(res) {
+                    $scope.photo = $scope.initializePhoto(res);
+                    $scope.status = 'loaded';
+                });
             });
         }
 

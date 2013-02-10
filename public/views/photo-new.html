@@ -1,13 +1,14 @@
 <div style="height: 355px; float: left; margin-bottom: 20px;" class="thumbnail span4">
     <div style="height: 275.5px; position: relative;">
-        <p ng-show="status == 'loading'">Loading Image</p>
-        <p ng-show="status == 'idle'">Please drag an image</p>
-        <div style="z-index=10000; height:100%; border: 2px dotted red; border-radius: 10px;" class="drop"></div>
+        <div style="background-color: #F8F8F8; box-shadow: inset 0 0 10px #0088cc; z-index=10000; height:100%; border-radius: 10px;" class="drop">
+            <p style="text-align: center; padding-top: 35%; height: 1em; position: relative; top: -0.5em; color: #0088cc; font-size: 20px;" ng-show="status == 'loading'">Loading..</p>
+            <p style="text-align: center; padding-top: 35%; height: 1em; position: relative; top: -0.5em; color: #0088cc; font-size: 20px;" ng-show="status == 'idle'">Please drop an image</p>
+        </div>
         <img style="top: 0px; z-index=-10000; position: absolute; height: 277.5px; width: 370px;" ng-show="photo" ng-src="{{ photo.data }}" rel="{{ photo.title }}"/>
     </div>
     <div ng-show="photo" class="caption">
         <form ng-submit="submitPhoto()">
-            <input style="width: 90%" ng-show="photo" type="text" ng-model="photo.title"></input>
+            <input style="width: 90%; text-align: center;" ng-show="photo" type="text" ng-model="photo.title"></input>
         </form>
     </div>
 </div>
