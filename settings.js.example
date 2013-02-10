@@ -1,0 +1,10 @@
+settings = {
+    AMAZON_S3_KEY : '',
+    AMAZON_S3_SECRET : '',
+    AMAZON_S3_BUCKET : '',
+    IMAGE_UPLOAD_DIR : '',
+    MONGO_URL: '',
+    MONGO_URL_TEST : ''
+}
+
+exports.settings = settings;
