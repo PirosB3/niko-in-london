@@ -184,10 +184,12 @@ angular.module('nikoInLondon.controllers', ['nikoInLondon.services']).
         }
 
         $scope.submitPhoto = function() {
+            $scope.saving = true;
             $scope.photo.$save(function(res) {
                 Photo.getPhotos().then(function(photos) {
                     photos.push(res);    
                     $scope.photo = undefined;
+                    $scope.saving = false;
                     $scope.$digest();
                 });
             });

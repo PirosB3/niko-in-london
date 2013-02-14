@@ -8,7 +8,7 @@
     </div>
     <div ng-show="photo" class="caption">
         <form ng-submit="submitPhoto()">
-            <input style="width: 90%; text-align: center;" ng-show="photo" type="text" ng-model="photo.title"></input>
+            <input style="width: 90%; text-align: center;" ng-show="photo" type="text" ng-model="photo.title" ng-disabled="saving"></input>
         </form>
     </div>
 </div>
