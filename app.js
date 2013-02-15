@@ -19,7 +19,7 @@ var client = knox.createClient({
 });
 var persistence = new Persistence({
     mongoUrl: process.env.MONGO_URL || settings.MONGO_URL,
-    pathDecorator : utils.createSignedS3Decorator(client)
+    pathDecorator : utils.createS3Decorator(client)
 });
 
 app.configure(function(){

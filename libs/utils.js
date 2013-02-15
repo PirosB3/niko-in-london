@@ -40,11 +40,9 @@ var saveBase64Image = function(img) {
     return d.promise;
 }
 
-var createSignedS3Decorator = function(client) {
+var createS3Decorator = function(client) {
     return function(url) {
-        var expiration = new Date();
-        expiration.setMinutes(expiration.getMinutes() + 30);
-        return client.signedUrl(url, expiration);
+        return client.https(url);
     };
 }
 
@@ -80,7 +78,7 @@ var storeImageInS3 = function(imageUploadDir, client, fileObject, imageBuffer) {
     return d.promise;
 };
 
-exports.createSignedS3Decorator = createSignedS3Decorator;
+exports.createS3Decorator = createS3Decorator;
 exports.storeImageInS3 = storeImageInS3;
 exports.FileDescriptor = FileDescriptor;
 exports.resizePhoto = resizePhoto;

@@ -28,10 +28,10 @@ buster.testCase('utils', {
         });
     },
     'it should return a string' : function() {
-        var pathDecorator = utils.createSignedS3Decorator(client);
+        var pathDecorator = utils.createS3Decorator(client);
         var url = pathDecorator('/hello/world');
         assert.same(typeof url, 'string');
-        assert(/^http/.test(url));
+        assert.same(url, 'https://niko-in-london-testing.s3.amazonaws.com/hello/world');
     },
     'it should return true' : function(done) {
         var fileObject = new utils.FileDescriptor({
@@ -79,7 +79,7 @@ buster.testCase('persistence', {
         MongoClient.connect(settings.MONGO_URL_TEST, function(err, db) {
             _this.persistence = new persistence.Persistence({
                 database: db,
-                pathDecorator : utils.createSignedS3Decorator(client)
+                pathDecorator : utils.createS3Decorator(client)
             });
             db.collection('photos', function(err, coll) {
                 coll.remove(done);
