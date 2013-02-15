@@ -13,12 +13,12 @@ var express = require('express')
 
 var app = express();
 var client = knox.createClient({
-    key: process.env.AMAZON_S3_KEY || settings.AMAZON_S3_KEY
-  , secret: process.env.AMAZON_S3_SECRET || settings.AMAZON_S3_SECRET
-  , bucket: process.env.AMAZON_S3_BUCKET || settings.AMAZON_S3_BUCKET
+    key: settings.AMAZON_S3_KEY
+  , secret: settings.AMAZON_S3_SECRET
+  , bucket: settings.AMAZON_S3_BUCKET
 });
 var persistence = new Persistence({
-    mongoUrl: process.env.MONGO_URL || settings.MONGO_URL,
+    mongoUrl: settings.MONGO_URL,
     pathDecorator : utils.createS3Decorator(client)
 });
 
@@ -57,7 +57,7 @@ app.post('/photos', function(req, res) {
         Q.when(utils.resizePhoto(fileObject)).then(function(fileObject) {
             fs.readFile(fileObject.getPath(), function(err, data) {
                 if (err) return res.json({ error: 'There was an error loading your file' });
-                    Q.when(utils.storeImageInS3(process.env.IMAGE_UPLOAD_DIR || settings.IMAGE_UPLOAD_DIR, client, fileObject, data))
+                    Q.when(utils.storeImageInS3(settings.IMAGE_UPLOAD_DIR, client, fileObject, data))
                     .then(function(imagePath) {
                         Q.when(persistence.addPhoto({ title: req.body.title, path: imagePath}))
                             .then(_.bind(res.json, res), function(err) {
