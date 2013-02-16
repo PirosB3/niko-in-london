@@ -1,8 +1,14 @@
 {
   "name": "niko-in-london",
+  "author" : {
+      "name": "Daniel Pyrathon",
+      "email": "pirosb3@gmail.com",
+      "url": "https://github.com/PirosB3/"
+  },
   "description": "Niko In London photoblog",
   "version": "0.0.1",
   "private": true,
+  "scripts" : { "start" : "node app" },
   "dependencies": {
     "express": "3.x",
     "knox": "0.4.6",
@@ -10,6 +16,10 @@
     "q": "0.8.11",
     "mongodb": "1.2.7",
     "jade": "0.27.7"
+  },
+  "devDependencies" : {
+      "testacular" : "0.4.0",
+      "buster" : "0.6.12"
   },
   "engines": {
      "node": "0.8.x",
