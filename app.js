@@ -32,6 +32,10 @@ app.configure(function(){
   app.use('/public', express.static(path.join(__dirname, 'public')));
 });
 
+app.configure('production', function(){
+  app.use(express.basicAuth(settings.AUTH_USERNAME, settings.AUTH_PASSWORD));
+});
+
 app.configure('development', function(){
   app.use(express.errorHandler());
 });

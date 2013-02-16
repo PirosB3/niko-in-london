@@ -4,6 +4,8 @@ exports.settings = {
     AMAZON_S3_BUCKET : '',
     IMAGE_UPLOAD_DIR : '/images/',
     MONGO_URL: '',
-    MONGO_URL_TEST : ''
+    MONGO_URL_TEST : '',
+    AUTH_USERNAME: '',
+    AUTH_PASSWORD: ''
 }
 
